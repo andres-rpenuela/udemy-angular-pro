@@ -6,7 +6,10 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    // activar zoneless:
+    // - eventCoalescing: agrupa múltiples eventos DOM.
+    // - runCoalescing: agrupa múltiples tareas asincrónicas (setTimeout, Promise, etc.).
+    provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true }),
     provideRouter(routes)
   ]
 };
