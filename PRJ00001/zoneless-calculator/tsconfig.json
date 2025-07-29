@@ -3,6 +3,12 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    /* alias path */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/app/*"],
+      "@calculator/*": ["src/app/calculator/*"]
+    },
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
