@@ -1,0 +1,41 @@
+# docker compose up --build
+# docker compose up -d --build
+
+# Steps
+# docker compose down --volumes
+# docker compose build --no-cache
+# docker compose up -d
+
+# Iniciar el conteneor de "pro"
+# docker compose up --build angular-prod
+
+# Iniciar el conteneor de "dev"
+# docker compose up --build angular-dev
+
+# debería servir Angular en 0.0.0.0:4200, gracias a la exposición y mapeo, deberías poder acceder desde tu host en http://localhost:4200
+# Si tienes problemas, confirma dentro del contenedor
+# docker exec -it <container_id> bash
+# netstat -tlnp | grep 4200
+# ps aux | grep ng
+
+version: "3.8"
+
+services:
+  angular-dev:
+    build:
+      context: .
+      target: dev  # Usa el stage "dev" del Dockerfile
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./zoneless-calculator:/app  # Monta tu código fuente local (reemplaza lo que hace el copy en app)
+      - /app/node_modules  # Evita sobrescribir node_modules del contenedor
+    command: ["yarn", "start"] # Sobrescibe el cmd
+  angular-prod:
+    build:
+      context: .
+      target: prod                       # stage para producción (build + nginx)
+    ports:
+      - "80:80"
+    command: ["nginx", "-g", "daemon off;"]  # arranca nginx
+    restart: unless-stopped
