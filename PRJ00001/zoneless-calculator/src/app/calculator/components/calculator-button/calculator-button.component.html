@@ -1,0 +1,9 @@
+<!--<div class="w-1/4 border-r border-b border-indigo-400">
+  <button class="w-full h-16 outline-none focus:outline-none hover:bg-indigo-700 hover:bg-opacity-20 text-white text-opacity-50 text-xl font-light">C</button>
+</div>
+-->
+<!-- no hace falta el div, porque se usa el host, para añadir la clase al host element-->
+<button [class.is-command]="isCommand()">
+  <!-- proyecta el contenido donde se inyecta el host element-->
+  <ng-content></ng-content>
+</button>

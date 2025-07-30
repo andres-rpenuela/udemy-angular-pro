@@ -1,0 +1,17 @@
+button{
+  @apply w-full h-16 outline-none focus:outline-none hover:bg-indigo-700 hover:bg-opacity-20 text-white text-opacity-50 text-xl font-light;
+}
+
+/* ViewEncapsulatoin */
+/* opcion no recomendada, ya que lo convierte en un estilo global, para desencapsularlo */
+/*
+::ng-deep .is-command{
+  @apply bg-indigo-700 bg-opacity-20;
+}
+*/
+
+/* opcion a usar si se utiliza ViewEncapsulation.None o encapsulation: ViewEncapsulation.ShadowDom , opcion no recomenada**/
+/* tambien se puede usar [class.class-name]="condition", sobre el propio elemento en lugar del host-element para evitar la encapsulacion */
+.is-command{
+  @apply bg-indigo-700 bg-opacity-20;
+}
