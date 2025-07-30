@@ -1,4 +1,4 @@
-import { Component, HostBinding, input, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, ElementRef, HostBinding, input, OnInit, output, viewChild, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'calculator-button',
@@ -18,6 +18,11 @@ export class CalculatorButtonComponent implements OnInit {
   public isCommand = input( false, { transform: ( value : boolean | string ) =>  typeof value === 'string' ? value === '' : value });
   public isDobuleSize = input( false, { transform: ( value : boolean | string ) =>  typeof value === 'string' ? value === '' : value });
 
+  public onClick = output<string>();
+  //public contentValue = viewChild<ElementRef>('btnCal');
+  public contentValue = viewChild<ElementRef<HTMLButtonElement>>('btnCal');
+
+
   ngOnInit() {
   }
 
@@ -33,5 +38,16 @@ export class CalculatorButtonComponent implements OnInit {
   @HostBinding('class.w-2/4')
   get commandSytleSize(){
     return this.isDobuleSize();
+  }
+
+  public emitValue(){
+    if( !this.contentValue()?.nativeElement ){
+      return;
+    }
+
+    //console.log(this.contentValue())
+
+    const value = this.contentValue()!.nativeElement.innerText?.trim();
+    this.onClick.emit(value);
   }
 }

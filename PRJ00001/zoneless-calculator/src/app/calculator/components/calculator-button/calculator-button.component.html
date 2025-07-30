@@ -3,7 +3,7 @@
 </div>
 -->
 <!-- no hace falta el div, porque se usa el host, para añadir la clase al host element-->
-<button [class.is-command]="isCommand()">
+<button [class.is-command]="isCommand()" (click)="emitValue()" #btnCal>
   <!-- proyecta el contenido donde se inyecta el host element-->
   <ng-content></ng-content>
 </button>

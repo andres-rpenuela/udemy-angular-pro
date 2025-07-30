@@ -25,4 +25,7 @@ export class CalculatorComponent implements OnInit {
   ngOnInit() {
   }
 
+  public handleClick(value: string){
+    console.log("se ha puslado: "+value);
+  }
 }
