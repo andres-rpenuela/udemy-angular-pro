@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostBinding, input, OnInit, output, viewChild, ViewEncapsulation } from '@angular/core';
+import { Component, ElementRef, HostBinding, input, OnInit, output, signal, viewChild, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'calculator-button',
@@ -6,7 +6,9 @@ import { Component, ElementRef, HostBinding, input, OnInit, output, viewChild, V
   styleUrls: ['./calculator-button.component.css'],
   // aplica la clase la host element
   host:{
-    class: 'w-1/4 border-r border-b border-indigo-400',
+    class: 'border-r border-b border-indigo-400',
+    '[class.w-2/4]': 'isDobuleSize()' , // Alterantiva a usar @HostBinding(class.w-2/4)
+    '[class.w-1/4]': '!isDobuleSize()',  //evitar sobrescribr si se djea en class por defecto
     // attribute: 'hola',
     // 'data-size': 'XL'
   },
@@ -17,6 +19,7 @@ export class CalculatorButtonComponent implements OnInit {
 
   public isCommand = input( false, { transform: ( value : boolean | string ) =>  typeof value === 'string' ? value === '' : value });
   public isDobuleSize = input( false, { transform: ( value : boolean | string ) =>  typeof value === 'string' ? value === '' : value });
+  public isPressed = signal(false);
 
   public onClick = output<string>();
   //public contentValue = viewChild<ElementRef>('btnCal');
@@ -35,7 +38,7 @@ export class CalculatorButtonComponent implements OnInit {
   }
 
   // Esta clase es de tailwinds y es global, por lo que no se produce un view encapsulation
-  @HostBinding('class.w-2/4')
+  //@HostBinding('class.w-2/4')
   get commandSytleSize(){
     return this.isDobuleSize();
   }
@@ -49,5 +52,22 @@ export class CalculatorButtonComponent implements OnInit {
 
     const value = this.contentValue()!.nativeElement.innerText?.trim();
     this.onClick.emit(value);
+  }
+
+  public keyBoardPressedStyle(key:string){
+    if( !this.contentValue() ){
+      return;
+    }
+
+    const value = this.contentValue()!.nativeElement.innerText;
+
+    if( value !== key ) return;
+
+    this.isPressed.set(true);
+
+    setTimeout( () =>{
+        this.isPressed.set(false);
+    },100);
+
   }
 }
