@@ -50,13 +50,14 @@ export class CalculatorComponent implements OnInit {
 
   public handleClick(value: string) {
     console.log('se ha puslado: ' + value);
+    this.calculatorService.constuctNumber(value);
   }
 
   // Evento global, alternativa de usar host en la directiva @Componet
   //@HostListener('document:keyup', ['$event'])
   public handleKeyboardEvent(event: KeyboardEvent) {
     //console.log(event, event.key);
-    this.handleClick(event.key);
+    //this.handleClick(event.key);
 
     const keyEquivalents: Record<string, string> = {
       Espace: 'C',
@@ -64,14 +65,24 @@ export class CalculatorComponent implements OnInit {
       c: 'C',
       '*': 'x',
       '%': '%',
-      '/': '%',
+      '/': '/',
       Enter: '=',
+      Basckspace: 'Backspace',
     };
+
+
+    //console.log('handleKeyboardEvent, key up:',event.key);
+
+    if( event.key === 'Backspace'){
+      this.calculatorService.constuctNumber('Backspace');
+      return;
+    }
 
     // Llama la función keyBoardPressedStyle() de todos los hijos que son CalculatorButtonComponent
     // para ello `calculatorButtons`, es un viewChildren
     this.calculatorButtons().forEach((button) => {
       const key = keyEquivalents[event.key] ?? event.key;
+      // este metodo se encarga de validar el key y emitrlo al prade si esta ok
       button.keyBoardPressedStyle(key);
     });
   }

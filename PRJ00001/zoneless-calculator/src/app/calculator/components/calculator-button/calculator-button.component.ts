@@ -64,6 +64,7 @@ export class CalculatorButtonComponent implements OnInit {
     if( value !== key ) return;
 
     this.isPressed.set(true);
+    this.onClick.emit(value);
 
     setTimeout( () =>{
         this.isPressed.set(false);
