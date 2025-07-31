@@ -1,4 +1,12 @@
-import { Component, HostListener, OnInit, viewChildren } from '@angular/core';
+import { CalculatorService } from '@/calculator/services/calculator.service';
+import {
+  Component,
+  computed,
+  HostListener,
+  inject,
+  OnInit,
+  viewChildren,
+} from '@angular/core';
 import { CalculatorButtonComponent } from '@calculator/components/calculator-button/calculator-button.component';
 
 @Component({
@@ -26,11 +34,25 @@ export class CalculatorComponent implements OnInit {
 
   ngOnInit() {}
 
+  // servicio
+  private calculatorService = inject(CalculatorService);
+
+  // se recomiend usar una señal computed() para obtener el valor de las señales del servicio
+  // de esta forma, se actualiza el valor de la señal cuando cambia el valor de las señales del servicio
+  // como alternativa a los getters, que no se actualizan automáticamente
+  //public get resultText(): string {
+  //  return this.calculatorService.resultText();
+  //}
+  public resultText = computed( () => this.calculatorService.resultText() );
+  public subResultText = computed( () => this.calculatorService.subResultText() );
+  public lastOperator = computed( () => this.calculatorService.lastOperator() );
+
+
   public handleClick(value: string) {
     console.log('se ha puslado: ' + value);
   }
 
-  // Evento global, alternativa de usar host
+  // Evento global, alternativa de usar host en la directiva @Componet
   //@HostListener('document:keyup', ['$event'])
   public handleKeyboardEvent(event: KeyboardEvent) {
     //console.log(event, event.key);
@@ -39,7 +61,7 @@ export class CalculatorComponent implements OnInit {
     const keyEquivalents: Record<string, string> = {
       Espace: 'C',
       Clear: 'C',
-      'c': 'C',
+      c: 'C',
       '*': 'x',
       '%': '%',
       '/': '%',
@@ -47,7 +69,7 @@ export class CalculatorComponent implements OnInit {
     };
 
     // Llama la función keyBoardPressedStyle() de todos los hijos que son CalculatorButtonComponent
-
+    // para ello `calculatorButtons`, es un viewChildren
     this.calculatorButtons().forEach((button) => {
       const key = keyEquivalents[event.key] ?? event.key;
       button.keyBoardPressedStyle(key);
