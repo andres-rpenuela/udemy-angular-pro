@@ -31,6 +31,12 @@ services:
       - ./zoneless-calculator:/app  # Monta tu código fuente local (reemplaza lo que hace el copy en app)
       - /app/node_modules  # Evita sobrescribir node_modules del contenedor
     command: ["yarn", "start"] # Sobrescibe el cmd
+  angular-test:
+    build:
+      context: .
+      target: test                       # stage para producción (build + nginx)
+    command: ["yarn", "test"] # Sobrescibe el cmd
+    restart: unless-stopped
   angular-prod:
     build:
       context: .

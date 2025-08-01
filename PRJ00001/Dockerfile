@@ -49,11 +49,42 @@ EXPOSE 4200
 CMD ["yarn", "start"]
 
 # ####################################################################
-# Stage 4: Build app for production
+# Stage 4: Test con Chrome Headless
 # ####################################################################
+FROM build-deps as test
+WORKDIR /app
 
+# Instalar Chrome (solo en este stage)
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ttf-freefont
+
+ENV CHROME_BIN=/usr/bin/chromium-browser
+ENV PATH="$CHROME_BIN:$PATH"
+
+# Copiar todo para ejecutar tests
+COPY ./zoneless-calculator/ ./
+RUN yarn test
+
+# ####################################################################
+# Stage 5: Build app for production
+# ####################################################################
 FROM hot-reload as prod-build
 WORKDIR /app
+
+# Instalar Chrome (solo en este stage)
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ttf-freefont
+
+ENV CHROME_BIN=/usr/bin/chromium-browser
+ENV PATH="$CHROME_BIN:$PATH"
 
 # Copiar package.json y yarn.lock primero para instalar dependencias
 
@@ -63,10 +94,11 @@ RUN yarn install --frozen-lockfile
 
 # Test + Compilar
 COPY ./zoneless-calculator/ .
-RUN npx ng build --configuration production
+#RUN npx ng build --configuration production
+RUN yarn build --configuration production
 
 # ####################################################################
-# Stage 5: NGINX for production
+# Stage 6: NGINX for production
 # ####################################################################
 FROM nginx:alpine as prod
 
