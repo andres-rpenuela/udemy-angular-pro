@@ -8,7 +8,7 @@ const specialOperatiors = ['C', '%', '.', '+/-', '=', 'Backspace'];
   providedIn: 'root',
 })
 export class CalculatorService {
-  public resultText = signal<string>('-123.345');
+  public resultText = signal<string>('0');
   public subResultText = signal<string>('0');
   public lastOperator = signal<string>('+');
 
