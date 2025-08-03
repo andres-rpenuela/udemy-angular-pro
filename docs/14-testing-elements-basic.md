@@ -18,6 +18,7 @@ Aquí tienes un desglose claro de los elementos principales.
    1. [Aserciones Básicas](#aserciones-básicas)
    2. [Negación](#negación)
    3. [Ejemplo de uso combinado](#ejemplo-de-uso-combinado)
+3. [Apuntes Clave](#apuntes-clave)
 
 ## ✅ 1. **`describe()` – Agrupa un conjunto de pruebas**
 
@@ -178,3 +179,30 @@ expect(() => component.errorMethod()).toThrowError('Error esperado');
 ```
 
 ---
+
+📌 Apuntes clave
+
+1. TestBed.configureTestingModule con imports:
+  Usas el componente como un standalone component, lo cual es moderno y correcto para Angular 15+.
+>```ts
+>  await TestBed.configureTestingModule({
+>    imports: [CalculatorButtonComponent] // Se importa el componente directamente (standalone)
+>  }).compileComponents();
+>```
+
+2. fixture.detectChanges():
+  Necesario para que Angular aplique los cambios y el DOM esté listo para inspección.
+
+3. Warning en expect(component.isDobuleSize).toContain('false'):
+> ⚠️ isDobuleSize es un booleano, por lo tanto, no tiene .toContain(...).
+>✅ Debe ser:
+>
+>```ts
+>expect(component.isDobuleSize).toBeFalse();
+>```
+
+4. setInput vs @Input() directo:
+  fixture.componentRef.setInput(...) es útil en Angular 14+ y mejora las pruebas reactivas de @Input().
+
+5. DOM classList.split:
+  Revisas las clases del host correctamente para asegurarte que el estilo se aplica según la condición del @Input().
