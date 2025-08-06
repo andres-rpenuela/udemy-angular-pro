@@ -43,7 +43,7 @@ describe('CalculatorButtonComponent', () => {
 
   // Prueba 3: Verifica que cambie a w-2/4 cuando se activa isDobuleSize
   it('should apply w-2/4 when isDobuleSize is true', () => {
-    fixture.componentRef.setInput('isDobuleSize', true); // Se simula el cambio de entrada
+    fixture.componentRef.setInput('isDobuleSize', true); // Se simula el cambio de entrada, @input
     fixture.detectChanges(); // Se actualiza el DOM
 
     const hostCssClass: string[] = compiled.classList.value.split(' ');
@@ -51,4 +51,34 @@ describe('CalculatorButtonComponent', () => {
     expect(hostCssClass).toContain('w-2/4'); // Se espera clase de ancho doble
     expect(component.isDobuleSize() ).toBeTrue(); // Confirma que la propiedad fue activada
   });
+
+
+  // Espias para verificar la emisión de eventos @output
+  // Prueba 4: Verifica que se emite un valor al hacer clic
+  it('should emit value on click when handleClick is called', () => {
+    spyOn(component.onClick, 'emit'); // Espía al método emit del output, observa si se llama .emit
+
+    component.emitValue() // Simula el clic
+
+    expect(component.onClick.emit).toHaveBeenCalled(); // Verifica que se haya llamado al método emit
+    expect(component.onClick.emit).toHaveBeenCalledWith(''); // Verifica que se emita un valor vacío
+  });
+
+
+  it('should set isPressed to true when key matches contentValue', () => {
+    spyOn(component.onClick, 'emit'); // Espía al método emit del output, observa si se llama .emit
+
+    // simula
+    component.contentValue()!.nativeElement.innerText = '1'; // Simula el contenido del botón
+    component.keyBoardPressedStyle('1'); // Simula la pulsación de una tecla
+
+    expect(component.isPressed()).toBeTrue();
+    expect(component.onClick.emit).toHaveBeenCalledWith('1'); // Verifica que se emita un valor vacío
+    expect(component.isPressed()).toBe(true); // Verifica que se emita un valor vacío
+
+    setTimeout(() => {
+      expect(component.isPressed()).toBeFalse(); // Verifica que isPressed se restablezca a false después del timeout
+    }, 200); // Verifica que isPressed se restablezca a false después del timeout
+  });
 });
+

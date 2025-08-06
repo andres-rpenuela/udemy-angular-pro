@@ -180,7 +180,7 @@ expect(() => component.errorMethod()).toThrowError('Error esperado');
 
 ---
 
-📌 Apuntes clave
+## 📌 Apuntes clave
 
 1. TestBed.configureTestingModule con imports:
   Usas el componente como un standalone component, lo cual es moderno y correcto para Angular 15+.
@@ -206,3 +206,109 @@ expect(() => component.errorMethod()).toThrowError('Error esperado');
 
 5. DOM classList.split:
   Revisas las clases del host correctamente para asegurarte que el estilo se aplica según la condición del @Input().
+
+---
+
+## 📌 ¿Qué hace spyOn(...)?
+**spyOn(obj, methodName)** crea un **espía** (spy) sobre un método específico de un objeto. Sirve para:
+
+- Verificar si el método fue llamado
+- Ver cuántas veces fue llamado
+- Con qué argumentos fue llamado
+
+👉 En este caso:
+```ts
+spyOn(component.onClick, 'emit');
+```
+Esto reemplaza temporalmente *onClick.emit()* con una función espía. Así puedes usar:
+
+* toHaveBeenCalled()
+* toHaveBeenCalledTimes(n)
+* toHaveBeenCalledWith(value)
+
+### Ejemplo más completo:
+
+```ts
+it('should emit "5" when emitValue is called', () => {
+  spyOn(component.onClick, 'emit');
+
+  component.emitValue();
+
+  expect(component.onClick.emit).toHaveBeenCalledWith('5'); // Verifica que emitió el valor correcto
+});
+```
+### ¿Cuándo usar **spyOn**?
+Úsalo para observar:
+
+* Métodos públicos o privados
+* Llamadas a servicios
+* Emitters (@Output)
+* Métodos en otras clases inyectadas (como servicios)
+
+--- 
+
+## 📝 Apuntes: Uso de `done` en tests con Jasmine
+
+Uso de `done` en tests asíncronos de Jasmine, especialmente aplicado a tu caso con Angular y `setTimeout`.
+
+### 🔧 ¿Qué es `done`?
+
+`done` es una **función de callback** que Jasmine proporciona para que puedas indicarle **cuándo ha terminado un test asíncrono**.
+
+### 🤔 ¿Por qué se necesita?
+
+Jasmine, por defecto, **no espera** operaciones asincrónicas como:
+
+- `setTimeout`
+- `Promise`/`async/await` (si no usas `async`)
+- Observables sin `fakeAsync` o `done`
+
+Si no usas `done`, Jasmine **termina el test antes de tiempo**, lo que provoca:
+- ❌ Falsos positivos (test pasa sin ejecutar todo)
+- ❌ Falsos negativos (test falla porque no esperó)
+
+### ✅ ¿Cómo se usa `done`?
+
+```ts
+it('test async', (done) => {
+  setTimeout(() => {
+    expect(true).toBeTrue();
+    done(); // Indica a Jasmine que el test ha terminado correctamente
+  }, 100);
+});
+```
+
+> Sin `done()`, Jasmine no sabe que debe esperar.
+
+## 🧪 Aplicado a tu test:
+
+```ts
+it('should set isPressed to true and then false when keyboardPressStyle is called with a matching key', (done) => {
+  spyOn(component.onClick, 'emit');
+
+  component.contentValue()!.nativeElement.innerText = '1';
+  component.keyBoardPressedStyle('1');
+
+  expect(component.isPressed()).toBeTrue();
+  expect(component.onClick.emit).toHaveBeenCalledWith('1');
+  expect(component.isPressed()).toBe(true);
+
+  setTimeout(() => {
+    expect(component.isPressed()).toBeFalse(); // Se espera que se reinicie
+    done(); // ✅ Muy importante: indica que la parte asíncrona terminó
+  }, 200);
+});
+```
+### 🧠 ¿Qué pasaría si no pones `done()`?
+
+- Jasmine termina el test **antes de que se ejecute el `setTimeout`**
+- Entonces el `expect(component.isPressed()).toBeFalse()` ni siquiera se evalúa
+- Resultado: el test pasa **incorrectamente** o falla sin sentido
+
+## ✅ Buenas prácticas
+
+- Usa `done()` solo cuando trabajes con callbacks como `setTimeout`, suscripciones, etc.
+- En Angular, cuando uses `fakeAsync` y `tick()`, **no necesitas `done`**.
+- No olvides **llamar a `done()` dentro del callback**, no fuera.
+
+---
