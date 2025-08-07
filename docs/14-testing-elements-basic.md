@@ -305,10 +305,12 @@ it('should set isPressed to true and then false when keyboardPressStyle is calle
 - Entonces el `expect(component.isPressed()).toBeFalse()` ni siquiera se evalúa
 - Resultado: el test pasa **incorrectamente** o falla sin sentido
 
-## ✅ Buenas prácticas
+### ✅ Buenas prácticas
 
 - Usa `done()` solo cuando trabajes con callbacks como `setTimeout`, suscripciones, etc.
 - En Angular, cuando uses `fakeAsync` y `tick()`, **no necesitas `done`**.
 - No olvides **llamar a `done()` dentro del callback**, no fuera.
 
 ---
+
+## Probar contenido proyecto (ng-content)

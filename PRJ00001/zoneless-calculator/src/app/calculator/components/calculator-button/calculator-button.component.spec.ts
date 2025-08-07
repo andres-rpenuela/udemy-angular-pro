@@ -65,7 +65,7 @@ describe('CalculatorButtonComponent', () => {
   });
 
 
-  it('should set isPressed to true when key matches contentValue', () => {
+  it('should set isPressed to trueand tehn false when keyboardPressStyle is called with a matching key', (done) => {
     spyOn(component.onClick, 'emit'); // Espía al método emit del output, observa si se llama .emit
 
     // simula
@@ -76,9 +76,25 @@ describe('CalculatorButtonComponent', () => {
     expect(component.onClick.emit).toHaveBeenCalledWith('1'); // Verifica que se emita un valor vacío
     expect(component.isPressed()).toBe(true); // Verifica que se emita un valor vacío
 
+    // implica que se use "done" para esperar el timeout o se llame a la función "done"
     setTimeout(() => {
       expect(component.isPressed()).toBeFalse(); // Verifica que isPressed se restablezca a false después del timeout
     }, 200); // Verifica que isPressed se restablezca a false después del timeout
   });
+
+
+  it('should not set isPressed to true if not matching ', () => {
+    spyOn(component.onClick, 'emit'); // Espía al método emit del output, observa si se llama .emit
+
+    component.contentValue()!.nativeElement.innerText = '1'; // Simula el contenido del botón
+    component.keyBoardPressedStyle('2'); // Simula la pulsación de una tecla diferente
+
+    expect(component.isPressed()).toBeFalse(); // Verifica que isPressed no se active
+        expect(component.onClick.emit).not.toHaveBeenCalled(); // Verifica que no se emita ningún valor
+
+  });
+
 });
+
+// >npx  ng test --code-coverage
 
