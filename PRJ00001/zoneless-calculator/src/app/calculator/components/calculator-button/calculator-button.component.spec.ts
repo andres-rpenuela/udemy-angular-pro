@@ -1,5 +1,17 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { CalculatorButtonComponent } from "./calculator-button.component";
+import { Component } from "@angular/core";
+
+// para comprobar el contenido del proyecto, se debe importar el componente que se quiere evaluar
+@Component({
+  imports: [CalculatorButtonComponent], // Importa el componente que se quiere evaluar
+  template: `
+  <calculator-button>
+    <span class="project-content underline">Test content</span>
+  </calculator-button>`, // Se usa el componente que se quiere evaluar
+  standalone: true, // Indica que este componente es standalone
+})
+class TestHostComponent {}
 
 // npx ng test --code-coverage
 describe('CalculatorButtonComponent', () => {
@@ -95,6 +107,21 @@ describe('CalculatorButtonComponent', () => {
 
   });
 
+  it('should display project content', () => {
+    // crea un fixture para el componente de prueba
+    const testFixture = TestBed.createComponent(TestHostComponent);
+    console.log('TestHostComponent created: ', { testFixture });
+    //console.log(testFixture.debugElement);
+
+    // se carga el componente de prueba
+    const testComponent = testFixture.componentInstance;
+    const testCompiled = testFixture.nativeElement as HTMLElement;
+
+    expect(testComponent).toBeTruthy(); // Verifica que el componente de prueba se haya creado correctamente
+    expect(testCompiled.querySelector('.project-content')).toBeTruthy(); // Verifica que el contenido del proyecto exista
+    expect(testCompiled.querySelector('.project-content')?.textContent).toContain('Test content'); // Verifica que el contenido del proyecto se muestre correctamente
+    expect(testCompiled.querySelector('.project-content')?.classList).toContain('underline'); // Verifica que la clase 'underline' esté presente
+  });
 });
 
 // >npx  ng test --code-coverage

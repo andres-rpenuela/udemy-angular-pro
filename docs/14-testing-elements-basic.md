@@ -314,3 +314,43 @@ it('should set isPressed to true and then false when keyboardPressStyle is calle
 ---
 
 ## Probar contenido proyecto (ng-content)
+
+Para comprobar el contendio proyecto, realizamos los siguientes pasos:
+
+1. Crear un componente en el test.
+2. El componente importara el componente que se quiere evaluar
+3. El template del nuevo compoente, hara uso del selector del componente a evular, cuyo contenido esta dentro de un `span` que hace uso de una  o más clases css,
+que sirvan de revencia para detectar que hay un contendio referenciado, cuyo valor del span coincide con el proyecado.
+
+> Ejemplo:
+> ```ts
+> // para comprobar el contenido del proyecto, se debe importar el componente que se quiere evaluar
+> @Component({
+>   imports: [CalculatorButtonComponent], // Importa el componente que se quiere evaluar
+>   template: `
+>   <calculator-button>
+>     <span class="project-content underline">Test content</span>
+>   </calculator-button>`, // Se usa el componente que se quiere evaluar
+>   standalone: true, // Indica que este componente es standalone
+> })
+> class TestHostComponent {}  
+> ```
+
+4. Montamos el component para el test, se debería verificar que el `span` este en la posición.
+
+```ts
+it('should display project content', () => {
+    // crea un fixture para el componente de prueba
+    const testFixture = TestBed.createComponent(TestHostComponent);
+    console.log('TestHostComponent created: ', { testFixture });
+    //console.log(testFixture.debugElement);
+
+    // se carga el componente de prueba
+    const testComponent = testFixture.componentInstance;
+    const testCompiled = testFixture.nativeElement as HTMLElement;
+
+    expect(testComponent).toBeTruthy(); // Verifica que el componente de prueba se haya creado correctamente
+    expect(testCompiled.querySelector('.project-content')?.textContent).toContain('Test content'); // Verifica que el contenido del proyecto se muestre correctamente
+
+  });
+```
