@@ -79,7 +79,8 @@ describe('CalculatorButtonComponent', () => {
     // implica que se use "done" para esperar el timeout o se llame a la función "done"
     setTimeout(() => {
       expect(component.isPressed()).toBeFalse(); // Verifica que isPressed se restablezca a false después del timeout
-    }, 200); // Verifica que isPressed se restablezca a false después del timeout
+      done(); // ✅ IMPORTANTE: Llamar done cuando la verificación termina
+    }, 101); // Verifica que isPressed se restablezca a false después del timeout
   });
 
 
@@ -90,7 +91,7 @@ describe('CalculatorButtonComponent', () => {
     component.keyBoardPressedStyle('2'); // Simula la pulsación de una tecla diferente
 
     expect(component.isPressed()).toBeFalse(); // Verifica que isPressed no se active
-        expect(component.onClick.emit).not.toHaveBeenCalled(); // Verifica que no se emita ningún valor
+    expect(component.onClick.emit).not.toHaveBeenCalled(); // Verifica que no se emita ningún valor
 
   });
 
