@@ -354,3 +354,86 @@ it('should display project content', () => {
 
   });
 ```
+
+--- 
+
+## Mock para test en angular
+
+El mocking en Angular es una parte fundamental para hacer pruebas unitarias efectivas con Jasmine y TestBed.
+
+Hacer un "**mock**" es crear una *versión falsa* de una clase, servicio, dependencia o componente para poder probar algo sin depender del comportamiento real del objeto original.
+
+Ejemplos comunes de lo que se mockea:
+
+* Servicios (UserService, AuthService, etc.)
+* HTTP requests
+* Outputs de componentes hijos
+* Directivas/pipes personalizados
+* Dependencias inyectadas (como Router, ActivatedRoute)
+
+
+1. Crear un archivo Mock con los métodos que devuelvan el resultado deseado (_se puede crear en el mismo test_).
+```ts
+// user.service.mock.ts
+import { of } from 'rxjs';
+import { User } from './user.model';
+
+export const MOCK_USERS: User[] = [
+  { id: 1, name: 'Ana' },
+  { id: 2, name: 'Luis' },
+];
+
+export class MockUserService {
+  getUsers() {
+    return of(MOCK_USERS); // Simula un Observable como HttpClient
+  }
+}
+```
+>  **Nota:** Para usar **jasmine** en la clase del **mock**, el nombre del fichero debe contneter `*.spec.ts`
+
+2. Usar el Mock en las pruebas unitarias
+```ts
+// user.service.mock.ts
+import { of } from 'rxjs';
+import { User } from './user.model';
+
+export const MOCK_USERS: User[] = [
+  { id: 1, name: 'Ana' },
+  { id: 2, name: 'Luis' },
+];
+
+export class MockUserService {
+  getUsers() {
+    return of(MOCK_USERS); // Simula un Observable como HttpClient
+  }
+}
+```
+
+**Esto permite que toda la app funcion**e sin conexión al backend, insertando el modulo en el `app.module.ts`
+```ts
+// app.module.ts
+providers: [
+  { provide: UserService, useClass: MockUserService }
+]
+```
+
+O en el `app.config.ts` para versiones de Angular14+ estandalone:
+```ts
+// app.config.ts
+import { ApplicationConfig, provideHttpClient } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
+
+import { UserService } from './user/user.service';
+import { MockUserService } from './user/user.service.mock';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient(),
+    provideRouter(routes),
+
+    // 👇 Aquí usas el mock
+    { provide: UserService, useClass: MockUserService }
+  ]
+};
+```
