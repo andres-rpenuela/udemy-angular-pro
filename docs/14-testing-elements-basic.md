@@ -19,6 +19,12 @@ Aquí tienes un desglose claro de los elementos principales.
    2. [Negación](#negación)
    3. [Ejemplo de uso combinado](#ejemplo-de-uso-combinado)
 3. [Apuntes Clave](#apuntes-clave)
+4. [Espías (`spyOn`)](#espías-spyon)
+5. [Tests asíncronos con `done`](#tests-asíncronos-con-done)
+6. [Contenido proyectado (`ng-content`)](#contenido-proyectado-ng-content)
+7. [Mocking en Angular](#mocking-en-angular)
+8. [Evaluación de `ViewChildren` y contenido proyectado](#evaluación-de-viewchildren-y-contenido-proyectado)
+9. [Simulación de eventos (teclado)](#simulación-de-eventos-teclado)
 
 ## ✅ 1. **`describe()` – Agrupa un conjunto de pruebas**
 
@@ -621,3 +627,170 @@ it('should display proper calculation values', () => {
 ```
 
 ✅ Nota: **Haz el `console.log` después de cambiar los valores y llamar `detectChanges()`**, porque ahí es cuando los `computed()` se vuelven a evaluar.
+
+--- 
+
+## Evaluando ViewdChildren y Content Projected
+
+* `ViewChildren` es un **decorador de Angular** que permite acceder a **una lista de elementos hijos** (componentes o directivas) que están en la **vista del componente**, no en el contenido proyectado.
+* Devuelve **una señal (`Signal`) o `QueryList`**, dependiendo de si usas Angular Signals o la API clásica.
+* Útil para iterar o manipular componentes hijos directamente.
+
+```ts
+@ViewChildren(CalculatorButtonComponent)
+public calculatorButtons!: QueryList<CalculatorButtonComponent>;
+
+-- o Angular 15+
+public calculatorButtons = viewChildren(CalculatorButtonComponent);
+```
+
+Para evalutarlo, en tu test puedes hacer:
+
+```ts
+it('should have 19 calculator-button components', () => {
+  expect(component.calculatorButtons).toBeTruthy();
+  expect(component.calculatorButtons().length).toBe(19);
+});
+```
+
+✅ **Nota:**
+
+* Si `calculatorButtons` es un `Signal`, hay que llamarlo como función: `calculatorButtons()`.
+* Si fuera un `QueryList`, usarías `component.calculatorButtons.length`.
+
+---
+
+Si `ViewChildren` fuera privado o quieres testear **desde el DOM**, puedes usar:
+
+- Opción A: `querySelectorAll` en `compiled`
+
+```ts
+const buttons = compiled.querySelectorAll('calculator-button');
+expect(buttons.length).toBe(19);
+console.log(buttons[0].textContent?.trim()); // evalúa contenido
+```
+
+- Opción B: `DebugElement` y `By.directive`
+
+```ts
+import { By } from '@angular/platform-browser';
+
+const buttonsByDirective = fixture.debugElement.queryAll(By.directive(CalculatorButtonComponent));
+expect(buttonsByDirective.length).toBe(19);
+```
+
+✅ **Ventaja de esta opción:**
+
+* Permite interactuar directamente con las instancias de los componentes hijos, no solo con el DOM.
+
+---
+
+Independiente de la opción, para evaluar el contenido de botones y verificar lo que muestra cada botón:
+
+```ts
+expect(buttons[0].textContent?.trim()).toBe('C');
+expect(buttons[1].textContent?.trim()).toBe('+/-');
+expect(buttons[2].textContent?.trim()).toBe('%');
+expect(buttons[3].textContent?.trim()).toBe('÷');
+```
+
+* Esto te asegura que la **proyección de contenido** y el **template** están correctos.
+* Útil si tus botones son dinámicos o dependientes de `*ngFor`.
+
+---
+
+### 5️⃣ Resumen de estrategias
+
+| Estrategia                                      | Cuándo usar                                      | Comentario                                             |
+| ----------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------ |
+| `component.calculatorButtons()`                 | Acceso directo a `ViewChildren`                  | Solo si el decorador es público                        |
+| `compiled.querySelectorAll('selector')`         | Cuando `ViewChildren` es privado                 | Evalúa la proyección en el DOM                         |
+| `fixture.debugElement.queryAll(By.directive())` | Acceso directo a instancias de componentes hijos | Permite llamar métodos de los hijos y verificar estado |
+
+---
+
+## 📌 Apuntes: Evaluar eventos en Angular (KeyPress y actualizaciones de UI)
+
+### 1️⃣ Simular eventos de teclado en tests
+
+En Angular, puedes **disparar manualmente eventos del DOM** para simular interacciones del usuario.
+Ejemplo: enviar un evento `keyup` a `document`.
+
+```ts
+const eventEnter = new KeyboardEvent('keyup', { key: 'Enter' });
+document.dispatchEvent(eventEnter);
+```
+
+🔹 **Puntos clave:**
+
+* Usar `new KeyboardEvent('keyup', { key: '...' })`.
+* Disparar el evento sobre el mismo **elemento objetivo** que tu componente escucha (`document`, `window`, o un elemento específico).
+* Si el componente usa `@HostListener('document:keyup', ...)` o `(document:keyup)` en el `@Component.host`, el evento debe emitirse a `document`.
+
+---
+
+### 2️⃣ Verificar que el servicio mock haya sido llamado
+
+Cuando el evento dispara una acción que involucra un servicio mock:
+
+```ts
+expect(mockCalculatorService.constuctNumber).toHaveBeenCalled();
+expect(mockCalculatorService.constuctNumber).toHaveBeenCalledWith('=');
+```
+
+✅ **Buenas prácticas:**
+
+* Primero verificar que **se llamó** (`toHaveBeenCalled`).
+* Luego verificar que **los parámetros coinciden** (`toHaveBeenCalledWith(...)`).
+
+---
+
+### 3️⃣ Probar múltiples teclas en el mismo test
+
+Ejemplo con dos teclas diferentes:
+
+```ts
+// Enter → "="
+document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter' }));
+expect(mockCalculatorService.constuctNumber).toHaveBeenCalledWith('=');
+
+// Escape/Espace → "C"
+document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Espace' }));
+expect(mockCalculatorService.constuctNumber).toHaveBeenCalledWith('C');
+```
+
+---
+
+### 4️⃣ Evaluar cambios visuales tras eventos
+
+Si el evento cambia datos que afectan el template:
+
+```ts
+mockCalculatorService.resultText.and.returnValue('123');
+mockCalculatorService.subResultText.and.returnValue('10');
+mockCalculatorService.lastOperator.and.returnValue('-');
+
+fixture.detectChanges(); // IMPORTANTE: refrescar la vista
+
+expect(component.resultText()).toBe('123');
+expect(compiled.querySelector('#sub-result')?.textContent.trim()).toBe('10 -');
+```
+
+🔹 **Claves:**
+
+* **`fixture.detectChanges()`** es necesario para que Angular procese los cambios y actualice el DOM.
+* Acceder al DOM con `compiled.querySelector(...)` para validar contenido renderizado.
+* Usar `.trim()` para evitar problemas con espacios o saltos de línea.
+
+---
+
+### 5️⃣ Resumen de pasos para testear eventos
+
+| Paso | Acción                             | Ejemplo                                                |
+| ---- | ---------------------------------- | ------------------------------------------------------ |
+| 1    | Crear el evento                    | `new KeyboardEvent('keyup', { key: 'Enter' })`         |
+| 2    | Despachar el evento                | `document.dispatchEvent(event)`                        |
+| 3    | Verificar llamada a mocks          | `expect(mockService.method).toHaveBeenCalledWith(...)` |
+| 4    | (Opcional) Cambiar valores de mock | `mockService.prop.and.returnValue(...)`                |
+| 5    | Actualizar vista                   | `fixture.detectChanges()`                              |
+| 6    | Verificar cambios en DOM           | `querySelector(...).textContent.trim()`                |
