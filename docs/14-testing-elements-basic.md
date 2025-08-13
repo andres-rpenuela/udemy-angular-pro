@@ -409,7 +409,7 @@ export class MockUserService {
 }
 ```
 
-**Esto permite que toda la app funcion**e sin conexión al backend, insertando el modulo en el `app.module.ts`
+**Esto permite que toda la app funcione** sin conexión al backend, insertando el modulo en el `app.module.ts`
 ```ts
 // app.module.ts
 providers: [
@@ -437,3 +437,187 @@ export const appConfig: ApplicationConfig = {
   ]
 };
 ```
+Si por consiguiente solo se quiere utilizar en la clase del test, basta con añadirlo al provider del test y no sería necesario añadir el ` { provide: CalculatorService, useClass: MockCalculatorService}` en el ``app.config.ts`, pero en aplicaciones modulares de angular, se debe agregar en la configuración del módulo donde se usa, si no se agrega en el principal.
+
+```ts
+//calculator.component.spec.ts
+// Mock en el propio test
+export class MockCalculatorService{
+
+  // atributos mockeados
+  public resultText = jasmine.createSpy('resultText').and.returnValue('100.00');
+  public subResultText = jasmine.createSpy('subResultText').and.returnValue('50.00');
+  public lastOperator = jasmine.createSpy('lastOperator').and.returnValue('+');
+  private percentApplied = false;
+
+  // funciones mockeadas
+  public constuctNumber = jasmine.createSpy('constuctNumber');
+}
+
+// Test
+describe('CalculatorComponent', () => {
+  let fixture: ComponentFixture<CalculatorComponent>;
+  let component: CalculatorComponent;
+  let compiled: HTMLElement;
+
+  let mockCalatorService: MockCalculatorService;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [CalculatorComponent],
+      providers: [ { provide: CalculatorService, useClass: MockCalculatorService}  ] // Se inyecta el MockCalculatorService
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CalculatorComponent);
+    component = fixture.componentInstance;
+    compiled = fixture.nativeElement as HTMLElement;
+
+    fixture.detectChanges(); // se requiere para se detecten los cambios iniciales, como la injección de dependencias
+    console.log('CalculatorComponent created: ', { component }, { compiled });
+  });
+
+  it('should create the component', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should have the current getters',() => {
+    expect(component.resultText()).toBe('100.00');
+    expect(component.subResultText()).toBe('50.00');
+    expect(component.lastOperator()).toBe('+');
+  })
+
+});
+```
+### Dinamiznado los valroes del Mock para test en angular
+
+Para dinazar los valores del Mock y poder realizar test con diferntes parametros, se debe:
+
+
+1. **Crear una instancia del mock a nivel global** en la clase del test
+2. **Inyectar el servicio** y, para forzar que TypeScript devuelva la clase *mock*, usar:
+
+   ```ts
+   mockCalculatorService = TestBed.inject(CalculatorService) as unknown as MockCalculatorService;
+   ```
+
+3. **Explicación paso a paso**
+
+   1. `TestBed.inject` busca en el *dependency injection container* de Angular la instancia asociada a `CalculatorService`.
+   2. El tipo de retorno es el tipo real que Angular cree que es `CalculatorService`.
+
+      > Aquí aparece el problema:
+      >
+      > En los tests, normalmente quieres reemplazar el servicio real con un *mock* o *spy*.
+      > Pero TypeScript sigue pensando que el objeto devuelto es `CalculatorService`, **no** tu `MockCalculatorService`.
+      > Esto implica que:
+      >
+      >   * No puedes acceder a propiedades o métodos exclusivos del mock.
+      >   * TypeScript dará error si intentas tratarlos como `MockCalculatorService`.
+
+4. **Solución para asegurar que se utiliza un mock o spy**
+
+   1. `as unknown` → “Olvida lo que crees que es este tipo” (lo pasa a `unknown`, el tipo más seguro de todos).
+   2. `as MockCalculatorService` → “Confía en mí, esto es un `MockCalculatorService`”.
+
+---
+
+Si quieres, puedo también reescribirlo con un diagrama de flujo que muestre cómo pasa de `CalculatorService` real → `unknown` → `MockCalculatorService` para que quede aún más visual.
+
+
+```js
+describe('test',()=>{
+   let mockCalatorService: MockCalculatorService;
+   ....
+
+   beforeEach(async () => {
+    //...
+
+    // injectaormos el servicio para dinamizar (opcional)
+    mockCalatorService = TestBed.inject(CalculatorService) as unknown as MockCalculatorService;
+
+    //fixture.detectChanges(); // se requiere para se detecten los cambios iniciales, como la injección de dependencias
+    //console.log('CalculatorComponent created: ', { component }, { compiled }); // evitar si se usa computed(), el mostrar el `componente`
+  });
+  // ..
+
+  it('should display proper calcualtion values',() => {
+    // como son spy, se peude cambiar el valor
+    mockCalatorService.resultText.and.returnValue('50.00');
+    mockCalatorService.subResultText.and.returnValue('123');
+    mockCalatorService.lastOperator.and.returnValue('*');
+
+    fixture.detectChanges();
+
+    expect(component.resultText()).toBe('50.00');
+    expect(component.subResultText()).toBe('123');
+    expect(component.lastOperator()).toBe('*');
+  })
+}) 
+```
+
+**Importante**: Problmea de `computed()` y la detección de cambios.
+
+Cuando en el **beforeEach** se hace:
+```ts
+fixture.detectChanges(); // <-- aquí ya se evaluaban los computed() con el valor inicial del mock
+```
+Eso provocaba que las `computed()` se inicialice y se quede con el valor inicial (_'100.00', '50.00', '+'_) antes de que el test pudiera cambiar el spy.
+
+Al comentar f`ixture.detectChanges()` en el **beforeEach** y dejarlo solo en el test donde realmente haces los cambios:
+
+```ts
+mockCalatorService.resultText.and.returnValue('50.00');
+mockCalatorService.subResultText.and.returnValue('123');
+mockCalatorService.lastOperator.and.returnValue('*');
+
+fixture.detectChanges();
+
+expect(component.resultText()).toBe('50.00');
+```
+
+Lo que se consigue, es que ahora los `computed()` se evalúan después de cambiar los **spies**, por lo que ya devuelven el valor nuevo.
+
+💡 En general con `computed()` y **mocks**:
+
+- Detect changes lo más tarde posible, cuando ya hayas configurado el estado que quieres probar.
+- Si lo llamas antes, “fijas” el valor inicial y no se actualizará (_a menos que sean signals reactivas de verdad_).
+
+Otro problmea detectado, tiene que ver con **el momento en que estás haciendo el `console.log`** y cómo funcionan los `computed()` en Angular Signals. 
+Te explico paso a paso:
+
+1️⃣ Qué pasa en el `beforeEach`, el mostrar el valor del **componente** antes de detectar los cambios, es decir, cuando haces algo como:
+
+```ts
+beforeEach(() => {
+  fixture = TestBed.createComponent(CalculatorComponent);
+  component = fixture.componentInstance;
+
+  console.log(component.resultText()); // evitar usar aquí, si se usa mock con spias
+});
+```
+
+- El componente se crea, y los `computed()` se inicializan **inmediatamente** usando los valores actuales del servicio.
+- Si tu servicio mock todavía tiene los **valores iniciales** (`'100.00'`, `'20'`, `'-'`), eso es lo que verás.
+- **Cambiar los spies o señales después del `beforeEach` no afecta lo que ya logueaste.**  
+
+En otras palabras, el `console.log` en el `beforeEach` **siempre reflejará el estado inicial del servicio**, antes de que tu test cambie valores.
+
+2️⃣ Cómo ver los cambios reales: Si quieres ver los valores que realmente van a usar tus tests:
+
+```ts
+it('should display proper calculation values', () => {
+  mockCalatorService.setResultText('50.00');
+  mockCalatorService.setSubResultText('123');
+  mockCalatorService.setLastOperator('*');
+
+  fixture.detectChanges();
+
+  console.log(component.resultText()); // Ahora sí muestra '50.00'
+  console.log(component.subResultText()); // '123'
+  console.log(component.lastOperator()); // '*'
+
+  expect(component.resultText()).toBe('50.00');
+});
+```
+
+✅ Nota: **Haz el `console.log` después de cambiar los valores y llamar `detectChanges()`**, porque ahí es cuando los `computed()` se vuelven a evaluar.
