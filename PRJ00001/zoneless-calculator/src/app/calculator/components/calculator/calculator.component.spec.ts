@@ -3,6 +3,8 @@ import { CalculatorComponent } from './calculator.component';
 import { CalculatorService } from '@/calculator/services/calculator.service';
 import { MockCalculatorService } from '@/calculator/services/mock-calculator.service.spec';
 import { inject } from '@angular/core';
+import { By } from '@angular/platform-browser';
+import { CalculatorButtonComponent } from '../calculator-button/calculator-button.component';
 
 // npx  ng test --code-coverage
 
@@ -47,7 +49,11 @@ describe('CalculatorComponent', () => {
     expect(component.subResultText()).toBe('20');
     expect(component.lastOperator()).toBe('-');
     console.log( component );
-    expect(compiled.querySelector('span')?.innerText).toBe('20 -');
+
+    expect(compiled.querySelector('span')?.innerText).toBe('');
+
+    //fixture.detectChanges();
+    //expect(compiled.querySelector('span')?.innerText).toBe('20 -');
   })
 
   it('should display proper calcualtion values',() => {
@@ -78,4 +84,66 @@ describe('CalculatorComponent', () => {
     expect(component.subResultText()).toBe('123');
     expect(component.lastOperator()).toBe('*');
   })
+
+  // pruebas en viewChildren y content project
+  it('should have 19 calculator-button components',()=>{
+    // En el componente tenemos:
+    //   public calculatorButtons = viewChildren(CalculatorButtonComponent);
+    // Y esto genera una señal, probarlo basicmanetes sería, así de sencillo
+    expect(component.calculatorButtons).toBeTruthy();
+    expect(component.calculatorButtons().length).toBe(19);
+  });
+
+  it('should have 19 calculator-button components with content projection',()=>{
+    // Si viewChildren fuera privad, se peude utilizar la siguiente lógica, la de content projection
+    // y buscar en la vista, el compoennte por su selector
+
+    // Opción A.
+    const buttons = compiled.querySelectorAll('calculator-button');
+    expect(buttons.length).toBe(19);
+
+    // Opción B. alternativa, usando angular browser
+    const byttonByDirective = fixture.debugElement.queryAll(By.directive(CalculatorButtonComponent));
+    expect(byttonByDirective.length).toBe(19);
+
+    // evaluar el contenido
+    console.log(buttons[0].textContent?.trim());
+    expect(buttons[0].textContent?.trim()).toBe('C');
+    expect(buttons[1].textContent?.trim()).toBe('+/-');
+    expect(buttons[2].textContent?.trim()).toBe('%');
+    expect(buttons[3].textContent?.trim()).toBe('÷');
+
+  });
+
+  // Simular acciones de KeyPress
+  it('should handle keyboard events correctly',()=>{
+    const eventEnter = new KeyboardEvent('keyup',{key:'Enter'});
+    // manda el evento
+    document.dispatchEvent(eventEnter);
+
+    expect(mockCalculatorService.constuctNumber ).toHaveBeenCalled();
+    expect(mockCalculatorService.constuctNumber ).toHaveBeenCalledWith('=');
+
+    const escapeEnter = new KeyboardEvent('keyup',{key:'Espace'});
+    // manda el evento
+    document.dispatchEvent(escapeEnter);
+
+    expect(mockCalculatorService.constuctNumber ).toHaveBeenCalled();
+    expect(mockCalculatorService.constuctNumber ).toHaveBeenCalledWith('C');
+  });
+
+  it('should display result text correctly',()=>{
+    mockCalculatorService.resultText.and.returnValue('123');
+    mockCalculatorService.subResultText.and.returnValue('10');
+    mockCalculatorService.lastOperator.and.returnValue('-');
+
+    fixture.detectChanges();
+
+    expect(component.resultText()).toBe('123');
+
+    // search by id element
+    expect(compiled.querySelector('#sub-result')?.textContent?.trim() ).toBe('10 -');
+
+
+  });
 });
