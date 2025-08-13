@@ -3,6 +3,12 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    /* alias path */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/app/*"],
+      "@pages/*": ["src/app/pages/*"]
+    },
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
