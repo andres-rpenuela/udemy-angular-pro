@@ -61,3 +61,32 @@ For more information on using the Angular CLI, including detailed command refere
 
 ## Uso de tailwindcss 3
 Link: https://v3.tailwindcss.com/docs/guides/angular
+
+
+## Despliegue
+
+[netfly](https://app.netlify.com/teams/andres-rpenuela/projects)
+
+Basta con desplegar el contenido de la carpeta `dist/browser` en el deply,
+
+Si no se usa ssr, antes se debe activar el sistema de rutas basado en hash (#/ruta) para que Angular maneje la navegación sin depender del servidor. 
+
+```ts
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    // uso de Zoneless, e incompatible con provideZoneChangeDetection
+    provideZonelessChangeDetection(),
+    // para usar Zone.js, de frma avanzada
+    //provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true }),
+    provideRouter(routes, withHashLocation()),
+    provideClientHydration(withEventReplay())
+  ]
+};
+```
+
+Después de compilar (ng build), abre tu app y asegúrate de que las rutas se vean así:
+```
+https://tusitio.com/#/inicio
+https://tusitio.com/#/productos
+```
