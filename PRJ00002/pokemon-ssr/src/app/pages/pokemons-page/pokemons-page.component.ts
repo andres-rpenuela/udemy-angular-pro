@@ -1,9 +1,10 @@
-import { ApplicationRef, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ApplicationRef, Component, computed, inject, linkedSignal, OnDestroy, OnInit, signal } from '@angular/core';
 import { PokemonListComponent } from "@/pokemons/components/pokemon-list/pokemon-list.component";
-import { filter, first, Subscription } from 'rxjs';
+import { filter, first, Subscription, switchMap } from 'rxjs';
 import { PokemonsService } from '@/pokemons/services/pokemons.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SimplePokemon } from '@/pokemons/interfaces/simple-pokemon.interface';
+import { PaginationService } from '@/shared/service/pagination.service.';
 
 @Component({
   selector: 'pokemons-page',
@@ -62,13 +63,41 @@ export default class PokemonsPageComponent implements OnInit, OnDestroy{
   ngOnDestroy(): void {
 
   }
+    // paginacion
+  private pageService = inject(PaginationService);
+  public currentPage = toSignal(
+    this.pageService.currentPage$ ?? 1,
+    {initialValue: 1}
+  )
+
+
+
   // ejemplo con señales
   // convierte un obs en una señal
   // cuando el componente que contiene este signal se destruya, Angular llamará automáticamente al unsubscribe() sobre el observable
+  // public pokemons = toSignal(
+  //   this.pokemonService.loadPage( 0 ),
+  //   { initialValue: [] }
+  // );
+
+  /**
+   * Forma correcta usando toSignal con un Observable
+   * <ul>
+   *  <li>currentPage emite un nuevo número cuando la página cambia.</li>
+   *  <li>switchMap cancela la petición anterior y hace una nueva llamada a loadPage(page).
+   *  <li>toSignal convierte todo esto en una señal reactiva, por lo que pokemons() siempre devuelve la lista correcta de Pokemons según la página.</li>
+   * </ul>
+   */
   public pokemons = toSignal(
-    this.pokemonService.loadPage(0),
-    { initialValue: [] } // valor mientras el observable no emite)
+    this.pageService.currentPage$
+    .pipe(
+      switchMap(page => this.pokemonService.loadPage(page)) // cada cambio de page hace un GET
+    ),
+    { initialValue: [] } // valor mientras no llega nada
   );
 
+  goToPage(nextPage:number){
+    this.pageService.goToPage( nextPage );
+  }
 
 }

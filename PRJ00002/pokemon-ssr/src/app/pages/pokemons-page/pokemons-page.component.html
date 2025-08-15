@@ -1,5 +1,5 @@
 <h1 class="text-3xl">Listado de Pekemon</h1>
-<h2 class="text-xl">Pagina Actual</h2>
+<h2 class="text-xl">Pagina Actual {{ currentPage() }}</h2>
 
 <hr class="my-2">
 
@@ -13,10 +13,10 @@
 <!-- TODO: pagination-->
 
 <div class="flex justify-between">
-  <button class="mt-2">
+  <button class="mt-2" (click)="goToPage( currentPage() - 1 )">
     Anteriores
   </button>
-   <button class="mt-2">
+   <button class="mt-2" (click)="goToPage( currentPage() + 1 )">
     Siguientes
   </button>
 </div>
