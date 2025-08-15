@@ -1,6 +1,7 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, input, OnInit, signal } from '@angular/core';
 import { PokemonCardComponent } from "../pokemon-card/pokemon-card.component";
 import { PokemonListSkeletonComponent } from "./ui/pokemon-list-skeleton/pokemon-list-skeleton.component";
+import { SimplePokemon } from '@/pokemons/interfaces/simple-pokemon.interface';
 
 @Component({
   selector: 'pokemon-list',
@@ -9,6 +10,8 @@ import { PokemonListSkeletonComponent } from "./ui/pokemon-list-skeleton/pokemon
   imports: [PokemonCardComponent]
 })
 export class PokemonListComponent implements OnInit {
+
+  public pokemons = input.required<SimplePokemon[]>();
 
   constructor() { }
 

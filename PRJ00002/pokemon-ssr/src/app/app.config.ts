@@ -4,6 +4,7 @@ import { provideRouter, withHashLocation } from '@angular/router';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideServerRendering } from '@angular/ssr';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +15,8 @@ export const appConfig: ApplicationConfig = {
     //provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true }),
     provideRouter(routes),
     // provideRouter(routes, withHashLocation()),
-    provideClientHydration(withEventReplay())
+    provideClientHydration(withEventReplay()),
+    // htt
+    provideHttpClient(withFetch())
   ]
 };
