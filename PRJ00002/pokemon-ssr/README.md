@@ -210,9 +210,3 @@ Actualmente, Angular está generando **CSR** porque:
 * Por eso el build genera `index.csr.html` como fallback CSR y no un `index.html` que pueda usar Netlify directamente.
 
 En otras palabras: **SSR está instalado pero no se está ejecutando**, así que el build cae automáticamente en CSR.
-
----
-
-Si quieres, puedo explicarte **cómo hacer que tu build genere un `index.html` listo para Netlify usando solo CSR o prerender**, sin depender de SSR ni Node. Esto resolvería tu problema del 404.
-
-¿Quieres que haga eso?
