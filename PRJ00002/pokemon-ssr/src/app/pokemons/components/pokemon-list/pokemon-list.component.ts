@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { PokemonCardComponent } from "../pokemon-card/pokemon-card.component";
+import { PokemonListSkeletonComponent } from "./ui/pokemon-list-skeleton/pokemon-list-skeleton.component";
 
 @Component({
   selector: 'pokemon-list',
