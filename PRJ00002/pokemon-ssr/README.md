@@ -90,3 +90,129 @@ Después de compilar (ng build), abre tu app y asegúrate de que las rutas se ve
 https://tusitio.com/#/inicio
 https://tusitio.com/#/productos
 ```
+
+En el caso de que se use Angular **CSR, SSR y Prerendering** y esto genere el `index.csr.html`
+
+1️⃣ Crear el archivo _redirects correctamente
+
+Crea el archivo exactamente así (sin extensión, con guion bajo al inicio):
+
+> `src/_redirects`
+
+```bash
+# O se renombre a index.html
+/* /index.csr.html 200
+```
+
+> Nota: Se puede renombrar el fichero que genera el build en dist, a `index.html`
+
+2️⃣ Asegurar que Angular lo copie al build
+
+Esto le dice a Angular que copie el archivo al hacer el build.
+
+> `angular.json`
+
+```json
+"assets": [
+  {
+    "glob": "**/*",
+    "input": "public",
+    "output": "/"
+  },
+  "src/_redirects"
+],
+```
+
+> Nota si se crea rel fichero en "public", no hace falta añadir "src/_redirects"
+
+3️⃣ Hacer el build y verificar
+
+```bahs
+ng build --configuration production
+```
+Ahora abre la carpeta dist/tu-app/ y verifica que el archivo _redirects esté allí, al mismo nivel que index.html.
+
+Ejemplo:
+```css
+
+dist/
+└── tu-app/
+    ├── index.csr.html
+    ├── main.js
+    ├── styles.css
+    └── _redirects  ✅
+```
+
+4️⃣ Desplegar a Netlify
+
+Cuando subas esa carpeta a Netlify (ya sea con netlify deploy o arrastrando en la web), Netlify leerá _redirects y hará que cualquier ruta no encontrada redirija a index.csr.html.
+
+<details>
+💡 Tip adicional:
+Si quieres evitar depender del _redirects, también puedes usar un netlify.toml en la raíz del proyecto con:
+
+```toml
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+````
+
+Pero igual este archivo debe quedar incluido en la raíz del deploy.
+</details>
+
+--- 
+
+Perfecto, vamos a analizar tu `package.json` y ver por qué Angular está usando CSR en tu build actual.
+
+---
+
+### 🔹 Puntos clave de tu proyecto
+
+1. Tienes instalada la dependencia:
+
+```json
+"@angular/ssr": "^20.1.5"
+```
+
+Esto significa que tu proyecto **soporta SSR**, pero SSR no se activa automáticamente cuando haces un build simple con:
+
+```bash
+ng build
+```
+
+2. Tu `scripts`:
+
+```json
+"build": "ng build",
+"serve:ssr:pokemon-ssr": "node dist/pokemon-ssr/server/server.mjs"
+```
+
+* `ng build` → **solo genera la versión CSR**, que termina en `index.csr.html`.
+* Para usar SSR real, deberías correr algo como:
+
+```bash
+ng run pokemon-ssr:server
+```
+
+y luego usar `serve:ssr:pokemon-ssr`.
+
+3. Dependencias de SSR como `@angular/platform-server` y `express` están instaladas, pero **no se están usando en tu build de producción actual** porque `ng build` solo construye la app cliente (CSR).
+
+---
+
+### 🔹 Conclusión
+
+Actualmente, Angular está generando **CSR** porque:
+
+* Estás corriendo solo `ng build` (sin `server` ni `prerender`).
+* No estás levantando un servidor Node que ejecute SSR (`serve:ssr:pokemon-ssr` nunca se usa).
+* Por eso el build genera `index.csr.html` como fallback CSR y no un `index.html` que pueda usar Netlify directamente.
+
+En otras palabras: **SSR está instalado pero no se está ejecutando**, así que el build cae automáticamente en CSR.
+
+---
+
+Si quieres, puedo explicarte **cómo hacer que tu build genere un `index.html` listo para Netlify usando solo CSR o prerender**, sin depender de SSR ni Node. Esto resolvería tu problema del 404.
+
+¿Quieres que haga eso?
