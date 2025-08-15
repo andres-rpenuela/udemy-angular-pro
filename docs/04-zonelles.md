@@ -1,88 +1,146 @@
-# Zone.js y Zoneless en Angular
+# ⚙️ Zone.js y Zoneless en Angular
 
-## Índice
-1. [¿Qué es Zone.js?](#qué-es-zonejs)
-2. [¿Qué es Zoneless?](#qué-es-zoneless)
-3. [Comparación Zone.js vs Zoneless](#comparación-zonejs-con-zoneless-angular)
-4. [Trabajar Zoneless en Angular](#trabjar-zoneless)
-5. [Configuración de eventCoalescing](#configuración-de-eventcoalescing)
-6. [Ejemplo de eventCoalescing](#ejemplo)
+## 📚 Índice
 
----
-
-## ¿Qué es Zone.js?
-- Librería de bajo nivel usada por Angular para interceptar tareas asíncronas (setTimeout, promesas, eventos DOM, etc.).
-- Permite a Angular saber cuándo ejecutar la detección de cambios automáticamente.
+1. [¿Qué es Zone.js?](#1-qué-es-zonejs)
+2. [¿Qué es Zoneless Angular?](#2-qué-es-zoneless-angular)
+3. [Comparación: Zone.js vs Zoneless](#3-comparación-zonejs-vs-zoneless)
+4. [Trabajar con Zoneless](#4-trabajar-con-zoneless)
+5. [Configuración de `eventCoalescing`](#5-configuración-de-eventcoalescing)
+6. [Ejemplo práctico](#6-ejemplo-práctico)
+7. [Configuración recomendada](#7-configuración-recomendada)
+8. [📝 Conclusión](#8-📝-conclusión)
 
 ---
 
-## ¿Qué es Zoneless?
-- Una app zoneless en Angular no usa zone.js para el ciclo de detección de cambios.
-- El desarrollador controla manualmente cuándo Angular debe actualizar la vista.
-- Ofrece más control y potencialmente mejor rendimiento, pero requiere más trabajo.
+## 1️⃣ ¿Qué es Zone.js?
+
+- Es una librería de bajo nivel que Angular usa para interceptar tareas asincrónicas como:
+  - `setTimeout`, `Promise`, eventos DOM, etc.
+- Permite a Angular saber **cuándo ejecutar la detección de cambios automáticamente**, sin intervención del desarrollador.
 
 ---
 
-## Comparación Zone.js con Zoneless Angular
+## 2️⃣ ¿Qué es Zoneless Angular?
 
-|                               | `zone.js` (por defecto) | Zoneless Angular (`disableZone: true`) |
-|-------------------------------|-------------------------|----------------------------------------|
-| Automatiza ChangeDetection    | ✅ Sí                   | ❌ No (manual)                         |
-| Usa `NgZone`                  | ✅                      | ❌ (o `NgZone: 'noop'`)                |
-| Más simple de usar            | ✅                      | ❌ (requiere conocimiento avanzado)     |
-| Más eficiente en grandes apps | ❌ Puede ser ineficiente| ✅ Si bien optimizado                  |
-| Necesita `zone.js`            | ✅                      | ❌                                     |
-
-- **zone.js**: detección de cambios automática, menos eficiente.
-- **Zoneless Angular**: más rendimiento y control, pero gestión manual.
+- Es un modo de ejecución en Angular donde **Zone.js no está presente**.
+- El desarrollador debe **controlar manualmente** cuándo Angular actualiza la vista.
+- Requiere el uso de:
+  - `ChangeDetectorRef`
+  - `ApplicationRef.tick()`
+  - Signals (Angular 17+)
+- Ofrece **mayor rendimiento y control**, pero exige más conocimiento técnico.
 
 ---
 
-## Trabjar Zoneless
+## 3️⃣ Comparación: Zone.js vs Zoneless
 
-- En Angular 20+, el archivo de configuración incluye la función `provideZoneChangeDetection`:
+| Característica                  | Zone.js (por defecto) | Zoneless Angular (`disableZone: true`) |
+|--------------------------------|------------------------|----------------------------------------|
+| Detección automática de cambios| ✅ Sí                  | ❌ No (manual)                         |
+| Uso de `NgZone`                | ✅ Disponible          | ❌ Reemplazado por `NgZone: 'noop'`   |
+| Facilidad de uso               | ✅ Simple              | ⚠️ Requiere experiencia                |
+| Rendimiento en apps grandes    | ❌ Puede ser costoso   | ✅ Más eficiente                       |
+| Dependencia de `zone.js`       | ✅ Obligatoria         | ❌ Eliminada                          |
 
-```typescript
+---
+
+## 4️⃣ Trabajar con Zoneless
+
+En Angular 18+, puedes usar `provideZonelessChangeDetection()` para activar el modo Zoneless:
+
+```ts
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZonelessChangeDetection(),
+    provideRouter(routes),
+    provideClientHydration(withEventReplay())
+  ]
+};
+```
+
+### 🛠️ Requisitos adicionales
+
+- Elimina `zone.js` de `polyfills.ts` y `angular.json`.
+- Usa `ChangeDetectionStrategy.OnPush` en tus componentes.
+- Usa signals o `ChangeDetectorRef` para actualizar la vista.
+
+---
+
+## 5️⃣ Configuración de `eventCoalescing`
+
+Si decides mantener Zone.js pero optimizarlo, puedes usar:
+
+```ts
+provideZoneChangeDetection({
+  eventCoalescing: true,
+  runCoalescing: true
+})
+```
+
+### 🔍 ¿Qué hacen?
+
+- `eventCoalescing`: Agrupa múltiples eventos DOM en un solo ciclo de detección.
+- `runCoalescing`: Agrupa múltiples tareas asincrónicas (`setTimeout`, `Promise`, etc.) en una sola ejecución.
+
+Esto mejora el rendimiento sin eliminar Zone.js.
+
+---
+
+## 6️⃣ Ejemplo práctico
+
+### ❌ Sin `eventCoalescing`
+
+```ts
+element.addEventListener('input', () => console.log('input'));
+element.addEventListener('keydown', () => console.log('keydown'));
+```
+
+Cada evento dispara una ejecución de Change Detection.
+
+### ✅ Con `eventCoalescing: true`
+
+Si ambos eventos ocurren en el mismo ciclo de eventos, Angular ejecuta **una sola detección de cambios**, reduciendo el costo computacional.
+
+---
+
+## 7️⃣ Configuración recomendada
+
+### 🔧 Para Zoneless Angular
+
+```ts
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideZonelessChangeDetection(), // Activación del modo Zoneless
+    provideRouter(routes),
+    provideClientHydration(withEventReplay())
+  ]
+};
+```
+
+### ⚙️ Para Zone.js optimizado
+
+```ts
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true }),
     provideRouter(routes)
   ]
 };
 ```
 
-- Elimina la importación de zone.js de `polyfills.ts`.
-- Debes usar `ChangeDetectorRef` y `applicationRef.tick()` para actualizar la vista manualmente.
-
-> En versiones anteriores:
-> ```typescript
-> import { bootstrapApplication } from '@angular/platform-browser';
-> import { AppComponent } from './app/app.component';
-> import { provideZoneChangeDetection } from '@angular/core';
->
-> bootstrapApplication(AppComponent, {
->   providers: [provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true })],
-> });
-> ```
+> ⚠️ No combines `provideZonelessChangeDetection()` con `provideZoneChangeDetection(...)`. Son **mutuamente excluyentes**.
 
 ---
 
-## Configuración de eventCoalescing
+## 8️⃣ 📝 Conclusión
 
-- `eventCoalescing: true` agrupa múltiples eventos DOM en una sola ejecución de Change Detection.
-- Útil para mejorar el rendimiento cuando hay muchos eventos seguidos.
+- **Zone.js** es ideal para proyectos que buscan simplicidad y compatibilidad con librerías existentes.
+- **Zoneless Angular** ofrece mayor rendimiento y control, pero requiere una arquitectura más explícita.
+- Si no puedes eliminar Zone.js, usar `eventCoalescing` y `runCoalescing` es una excelente forma de optimizarlo.
+- Angular 18 y posteriores están diseñados para facilitar la transición hacia Zoneless, especialmente con signals y `OnPush`.
 
 ---
-
-## Ejemplo
-
-Sin eventCoalescing:
-
-```typescript
-element.addEventListener('input', () => console.log('input'));
-element.addEventListener('keydown', () => console.log('keydown'));
-```
-Cada evento dispara una ejecución de Change Detection por separado.
-
-Con `eventCoalescing: true`, si ambos eventos ocurren en el mismo ciclo de evento, Angular solo ejecuta Change Detection
