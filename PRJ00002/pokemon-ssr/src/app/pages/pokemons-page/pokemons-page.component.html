@@ -4,11 +4,11 @@
 <hr class="my-2">
 
 <!-- TODO: Pokemon List -->
-<!-- @if(isLoading()){ -->
-  <!-- <pokemon-list-skeleton></pokemon-list-skeleton> -->
-<!-- }@else { -->
+@if(pokemons().length == 0){
+  <pokemon-list-skeleton></pokemon-list-skeleton>
+}@else {
  <pokemon-list [pokemons]="pokemons()"></pokemon-list>
-<!-- } -->
+}
 <!-- TODO: Pokemon list-skeleton -->
 <!-- TODO: pagination-->
 

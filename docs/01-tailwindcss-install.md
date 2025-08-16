@@ -123,3 +123,51 @@ Ejemplo en `app.component.html`:
   Hello Tailwind + Angular!
 </h1>
 ```
+
+--- 
+
+## Configurar un efecto en Tailwindcss 3
+
+1. Añadir la configuracion:
+
+```js
+// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{html,ts,css,scss,sass}",
+  ],
+  theme: {
+    extend: {
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: 0},
+          '100%': {opacity: 1}
+        }
+      },
+      animation:{
+        fadeIn: 'fadeIn .2s ease-in-out'
+      }
+    },
+  },
+  plugins: [],
+}
+
+```
+
+2. Nombarlo en el elemento a utilizar.
+
+```html
+<div class="animate-fadeIn bg-blue-500 h-44 bg-opacity-25 max-w-sm rounded-lg overflow-hidden shadow-md flex flex-col p-4 items-center justify-center cursor-pointer">
+  <img
+    class="w-24 h-24"
+    width="96px"
+    height="96px"
+    [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokemon().id + '.png'"
+    [alt]="pokemon().name">
+
+  <div class="px-6 py-4">
+    <div class="font-bold text-xl mb-2 text-center capitalize">{{pokemon().name}}</div>
+  </div>
+</div>
+```

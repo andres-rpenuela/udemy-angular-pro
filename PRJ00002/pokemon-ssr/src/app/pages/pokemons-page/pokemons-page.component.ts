@@ -1,20 +1,21 @@
 import { ApplicationRef, Component, computed, inject, linkedSignal, OnDestroy, OnInit, signal } from '@angular/core';
 import { PokemonListComponent } from "@/pokemons/components/pokemon-list/pokemon-list.component";
-import { filter, first, Subscription, switchMap, tap } from 'rxjs';
+import { delay, filter, first, Subscription, switchMap, tap } from 'rxjs';
 import { PokemonsService } from '@/pokemons/services/pokemons.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SimplePokemon } from '@/pokemons/interfaces/simple-pokemon.interface';
 import { PaginationService } from '@/shared/service/pagination.service.';
 import { Title } from '@angular/platform-browser';
+import { PokemonListSkeletonComponent } from "@/pokemons/components/pokemon-list/ui/pokemon-list-skeleton/pokemon-list-skeleton.component";
 
 @Component({
   selector: 'pokemons-page',
   templateUrl: './pokemons-page.component.html',
   styleUrls: ['./pokemons-page.component.css'],
-  imports: [PokemonListComponent]
+  imports: [PokemonListComponent, PokemonListSkeletonComponent]
 })
 export default class PokemonsPageComponent implements OnInit, OnDestroy{
-  public isLoading = signal(true);
+  //public isLoading = signal(true);
 
   private appRef = inject(ApplicationRef);
 
@@ -94,6 +95,7 @@ export default class PokemonsPageComponent implements OnInit, OnDestroy{
     this.pageService.currentPage$
     .pipe(
       tap(page => this.title.setTitle(`Pokémo SSR - PAGE ${page}`)), // cambia el title de la pagina del head
+      delay(1000),
       switchMap(page => this.pokemonService.loadPage(page)), // cada cambio de page hace un GET
     ),
     { initialValue: [] } // valor mientras no llega nada
