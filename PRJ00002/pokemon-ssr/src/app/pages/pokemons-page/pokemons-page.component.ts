@@ -1,10 +1,11 @@
 import { ApplicationRef, Component, computed, inject, linkedSignal, OnDestroy, OnInit, signal } from '@angular/core';
 import { PokemonListComponent } from "@/pokemons/components/pokemon-list/pokemon-list.component";
-import { filter, first, Subscription, switchMap } from 'rxjs';
+import { filter, first, Subscription, switchMap, tap } from 'rxjs';
 import { PokemonsService } from '@/pokemons/services/pokemons.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SimplePokemon } from '@/pokemons/interfaces/simple-pokemon.interface';
 import { PaginationService } from '@/shared/service/pagination.service.';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'pokemons-page',
@@ -80,6 +81,7 @@ export default class PokemonsPageComponent implements OnInit, OnDestroy{
   //   { initialValue: [] }
   // );
 
+  public title = inject(Title); // from Browser
   /**
    * Forma correcta usando toSignal con un Observable
    * <ul>
@@ -91,7 +93,8 @@ export default class PokemonsPageComponent implements OnInit, OnDestroy{
   public pokemons = toSignal(
     this.pageService.currentPage$
     .pipe(
-      switchMap(page => this.pokemonService.loadPage(page)) // cada cambio de page hace un GET
+      tap(page => this.title.setTitle(`Pokémo SSR - PAGE ${page}`)), // cambia el title de la pagina del head
+      switchMap(page => this.pokemonService.loadPage(page)), // cada cambio de page hace un GET
     ),
     { initialValue: [] } // valor mientras no llega nada
   );
