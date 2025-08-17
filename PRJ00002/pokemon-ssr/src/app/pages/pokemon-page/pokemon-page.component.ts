@@ -1,9 +1,10 @@
 import { Pokemon } from '@/pokemons/interfaces/pokemon.interface';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { delay, switchMap } from 'rxjs';
+import { delay, switchMap, tap } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 
 @Component({
@@ -18,6 +19,9 @@ export default class PokemonPageComponent implements OnInit {
   private id = inject(ActivatedRoute).snapshot.paramMap.get('id');
   private readonly RESOURCE_URL = "https://pokeapi.co/api/v2/pokemon/";
 
+  private title = inject(Title);
+  private meta = inject(Meta);
+
   // ejemplo de rxResource, en lugar de usarlo en el servicio
   public pokemon = rxResource<Pokemon, { id: string | null }>({
     params: () => ({ id: this.id }),   // ✅ antes era "request"
@@ -25,10 +29,24 @@ export default class PokemonPageComponent implements OnInit {
       fromFetch(`${this.RESOURCE_URL}${params.id}`).pipe(
         delay(1000),
         switchMap(res => res.json() as Promise<Pokemon>)
+      )
+      .pipe(
+        tap( ({id, name}) => {
+            const title = `${id} - Pokemon ${name}`;
+            const description = `Details Pokemon - ${name}`
+            this.title.setTitle(title);
+
+            this.meta.updateTag( {name:"description",content: description});
+
+            // rrss
+            this.meta.updateTag( {name:"og:title",content: title});
+            this.meta.updateTag( {name:"og:description",content: description});
+            this.meta.updateTag( {name:"og:image",content: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`})
+
+        })
       ),
     defaultValue: {} as Pokemon        // evita undefined en .value()
   });
-
 
   constructor() { }
 
