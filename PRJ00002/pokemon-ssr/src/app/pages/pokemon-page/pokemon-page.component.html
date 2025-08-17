@@ -1,4 +1,7 @@
-<div *ngIf="!pokemon.error() && !pokemon.isLoading() && pokemon.value() as p" class="max-w-xl mx-auto bg-white rounded-2xl shadow-lg p-6 text-black">
+@if( !pokemon.error() && !pokemon.isLoading() && pokemon.value() ){
+  @let p = pokemon.value()!;
+
+  <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-lg p-6 text-black">
   <div class="flex items-center gap-4 mb-4">
     <img [src]="p.sprites?.other?.['official-artwork']?.front_default || p.sprites?.front_default"
          [alt]="p.name"
@@ -6,7 +9,14 @@
     <div>
       <h2 class="text-2xl font-bold capitalize">{{ p.name }}</h2>
       <span class="text-sm text-gray-500">#{{ p.id }}</span>
+
+      @if( p.cries.latest != null){
+        <audio controls class="my-2">
+          <source [src]="p.cries.latest" type="audio/wav">
+        </audio>
+      }
     </div>
+
   </div>
 
   <div class="flex gap-2 mb-4">
@@ -23,29 +33,38 @@
     <div><span class="font-semibold">Altura:</span> {{ p.height / 10 }} m</div>
     <div><span class="font-semibold">Peso:</span> {{ p.weight / 10 }} kg</div>
     <div><span class="font-semibold">Experiencia:</span> {{ p.base_experience }}</div>
-    <div><span class="font-semibold">Habilidad:</span> {{ p.abilities[0]?.ability?.name }}</div>
+    <div><span class="font-semibold">Habilidad:</span> {{ p.abilities[0].ability?.name }}</div>
   </div>
 
   <div>
     <h3 class="font-semibold mb-2">Estadísticas</h3>
-    <div *ngFor="let s of p.stats" class="mb-2">
-      <div class="flex justify-between text-sm mb-1">
-        <span class="capitalize">{{ s.stat.name }}</span>
-        <span>{{ s.base_stat }}</span>
+    @for( s of p.stats; track $index){
+      <div class="mb-2">
+        <div class="flex justify-between text-sm mb-1">
+          <span class="capitalize">{{ s.stat.name }}</span>
+          <span>{{ s.base_stat }}</span>
+        </div>
+        <div class="h-2 w-full bg-gray-200 rounded">
+          <div class="h-2 bg-green-500 rounded" [style.width.%]="s.base_stat / 255 * 100"></div>
+        </div>
       </div>
-      <div class="h-2 w-full bg-gray-200 rounded">
-        <div class="h-2 bg-green-500 rounded" [style.width.%]="s.base_stat / 255 * 100"></div>
-      </div>
-    </div>
+    }
+
   </div>
 </div>
-
- <!-- Loading -->
-  <div *ngIf="pokemon.isLoading()" class="text-center text-gray-500 animate-bounce">
+}@else if(pokemon.isLoading() ){
+    <!-- Loading -->
+  <div class="text-center text-gray-500 animate-bounce">
     Cargando Pokémon...
   </div>
+} @else if ( pokemon.error() ) {
 
   <!-- Error -->
-  <div *ngIf="pokemon.error()" class="text-center text-red-600 font-semibold">
+  <div class="text-center text-red-600 font-semibold">
     No se pudo cargar el Pokémon. Verifica el ID.
   </div>
+}
+
+
+
+
