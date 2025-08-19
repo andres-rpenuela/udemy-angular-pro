@@ -1,4 +1,4 @@
-import { Component, input, OnInit, signal } from '@angular/core';
+import { Component, input, OnInit, output, signal } from '@angular/core';
 import { PokemonCardComponent } from "../pokemon-card/pokemon-card.component";
 import { PokemonListSkeletonComponent } from "./ui/pokemon-list-skeleton/pokemon-list-skeleton.component";
 import { SimplePokemon } from '@/pokemons/interfaces/simple-pokemon.interface';
@@ -13,9 +13,10 @@ export class PokemonListComponent implements OnInit {
 
   public pokemons = input.required<SimplePokemon[]>();
 
+  private loadedCount = 0;
+
   constructor() { }
 
   ngOnInit() {
   }
-
 }

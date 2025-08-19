@@ -4,19 +4,27 @@
 <hr class="my-2">
 
 <!-- TODO: Pokemon List -->
-@if(pokemons().length == 0){
+<!-- @if(pokemons().length == 0){
   <pokemon-list-skeleton></pokemon-list-skeleton>
 }@else {
  <pokemon-list [pokemons]="pokemons()"></pokemon-list>
+} -->
+@defer (when pokemons().length > 0) {
+  <pokemon-list [pokemons]="pokemons()"></pokemon-list>
+} @placeholder {
+  <pokemon-list-skeleton></pokemon-list-skeleton>
 }
+
 <!-- TODO: Pokemon list-skeleton -->
 <!-- TODO: pagination-->
 
 <div class="flex justify-between">
-  <button class="mt-2" (click)="goToPage( currentPage() - 1 )">
+  <!-- <button class="mt-2" (click)="goToPage( currentPage() - 1 )"> -->
+    <button class="mt-2" [disabled]=" currentPage() == 1" [routerLink]="['/pokemons/page', currentPage()-1]">
     Anteriores
   </button>
-   <button class="mt-2" (click)="goToPage( currentPage() + 1 )">
+   <!-- <button class="mt-2" (click)="goToPage( currentPage() + 1 )"> -->
+  <button class="mt-2" [routerLink]="['/pokemons/page', currentPage() +1 ]">
     Siguientes
   </button>
 </div>

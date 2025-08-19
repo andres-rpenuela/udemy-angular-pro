@@ -1,18 +1,19 @@
-import { ApplicationRef, Component, computed, inject, linkedSignal, OnDestroy, OnInit, signal } from '@angular/core';
+import { ApplicationRef, Component, computed, effect, inject, linkedSignal, OnDestroy, OnInit, signal } from '@angular/core';
 import { PokemonListComponent } from "@/pokemons/components/pokemon-list/pokemon-list.component";
-import { delay, filter, first, Subscription, switchMap, tap } from 'rxjs';
+import { delay, filter, first, map, of, Subscription, switchMap, tap } from 'rxjs';
 import { PokemonsService } from '@/pokemons/services/pokemons.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SimplePokemon } from '@/pokemons/interfaces/simple-pokemon.interface';
 import { PaginationService } from '@/shared/service/pagination.service.';
 import { Title } from '@angular/platform-browser';
 import { PokemonListSkeletonComponent } from "@/pokemons/components/pokemon-list/ui/pokemon-list-skeleton/pokemon-list-skeleton.component";
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'pokemons-page',
   templateUrl: './pokemons-page.component.html',
   styleUrls: ['./pokemons-page.component.css'],
-  imports: [PokemonListComponent, PokemonListSkeletonComponent]
+  imports: [PokemonListComponent, PokemonListSkeletonComponent, RouterLink]
 })
 export default class PokemonsPageComponent implements OnInit, OnDestroy{
   //public isLoading = signal(true);
@@ -66,12 +67,19 @@ export default class PokemonsPageComponent implements OnInit, OnDestroy{
 
   }
     // paginacion
-  private pageService = inject(PaginationService);
+  private activatedRouter = inject(ActivatedRoute);
   public currentPage = toSignal(
-    this.pageService.currentPage$ ?? 1,
-    {initialValue: 1}
-  )
+      this.activatedRouter.params.pipe(
+        map(params => Number(params['page']) || 1)
+      ),
+     {initialValue: 1}
+    );
 
+  // private pageService = inject(PaginationService);
+  // public currentPage = toSignal(
+  //   this.pageService.currentPage$ ?? 1,
+  //   {initialValue: 1}
+  // )
 
 
   // ejemplo con señales
@@ -83,6 +91,7 @@ export default class PokemonsPageComponent implements OnInit, OnDestroy{
   // );
 
   public title = inject(Title); // from Browser
+
   /**
    * Forma correcta usando toSignal con un Observable
    * <ul>
@@ -92,17 +101,25 @@ export default class PokemonsPageComponent implements OnInit, OnDestroy{
    * </ul>
    */
   public pokemons = toSignal(
-    this.pageService.currentPage$
-    .pipe(
-      tap(page => this.title.setTitle(`Pokémo SSR - PAGE ${page}`)), // cambia el title de la pagina del head
-      delay(1000),
-      switchMap(page => this.pokemonService.loadPage(page)), // cada cambio de page hace un GET
+    // this.pageService.currentPage$
+    // .pipe(
+    //   tap(page => this.title.setTitle(`Pokémo SSR - PAGE ${page}`)), // cambia el title de la pagina del head
+    //   delay(1000),
+    //   switchMap(page => this.pokemonService.loadPage(page-1)), // cada cambio de page hace un GET
+    // ),
+    this.activatedRouter.params.pipe(
+        map(params => Number(params['page']) || 1),
+        tap(page => this.title.setTitle(`Pokémo SSR - PAGE ${page}`)), // cambia el title de la pagina del head
+        switchMap(page => this.pokemonService.loadPage(page-1))
     ),
     { initialValue: [] } // valor mientras no llega nada
   );
 
-  goToPage(nextPage:number){
-    this.pageService.goToPage( nextPage );
-  }
+
+
+  // goToPage(nextPage:number){
+  //   this.pageService.goToPage( nextPage );
+  // }
+
 
 }

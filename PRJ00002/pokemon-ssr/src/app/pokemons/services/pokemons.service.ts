@@ -14,6 +14,7 @@ export class PokemonsService {
   constructor() { }
 
   public loadPage( page:number ): Observable<SimplePokemon[]>{
+    console.log(" laod page... "+page)
     if( page != 0){
         --page;
     }
