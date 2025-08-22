@@ -110,7 +110,7 @@ export default class PokemonsPageComponent implements OnInit, OnDestroy{
     this.activatedRouter.params.pipe(
         map(params => Number(params['page']) || 1),
         tap(page => this.title.setTitle(`Pokémo SSR - PAGE ${page}`)), // cambia el title de la pagina del head
-        switchMap(page => this.pokemonService.loadPage(page-1))
+        switchMap(page => this.pokemonService.loadPage(page))
     ),
     { initialValue: [] } // valor mientras no llega nada
   );
