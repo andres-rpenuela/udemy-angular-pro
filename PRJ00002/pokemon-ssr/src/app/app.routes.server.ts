@@ -28,13 +28,26 @@ export const serverRoutes: ServerRoute[] = [
       ]; // Generates paths like: pokemon/page/1, pokemon/page/2, pokemon/page/3
     },
   },
-  { // se ha cmadio a pathvairable
+  { // se ha cmadio a pathvairable (by id)
     path: 'pokemon/:id',
     renderMode: RenderMode.Prerender,
     async getPrerenderParams() {
       // Simulación de fetch/archivo/local DB
       const ids = ['1', '2', '3', '4', '5'];
       return ids.map(id => ({ id }));
+    },
+  },
+  { // se ha cmadio a pathvairable (by name)
+    path: 'pokemon/:id',
+    renderMode: RenderMode.Prerender,
+    async getPrerenderParams() {
+      // Simulación de fetch/archivo/local DB
+      const pokemonsList = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=20`)
+        .then(resp => resp.json());
+
+      // Devolvemos un array de objetos con { id: ... }
+      return pokemonsList.results.map((pokemon: any) => ({ id: pokemon.name }));
+      // Esto generará rutas como /pokemon/bulbasaur, /pokemon/ivysaur, etc.
     },
   },
   {

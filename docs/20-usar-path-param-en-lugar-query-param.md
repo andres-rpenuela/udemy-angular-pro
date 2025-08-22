@@ -1,10 +1,3 @@
-Perfecto 🙌
-Ya tienes un material bastante completo sobre **Prerendering / SSR en Angular (v17–20)**, sus diferencias de configuración y ejemplos de implementación. Lo que haré será **organizarlo en un documento estilo apunte/guía**, con un **índice** al inicio para navegar los temas y mantener todo lo que escribiste, más limpio y estructurado.
-
-Aquí te dejo la versión final:
-
----
-
 # 📘 Apuntes de Prerendering y SSR en Angular
 
 ## 📑 Índice
