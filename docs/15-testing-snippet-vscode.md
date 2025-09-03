@@ -138,3 +138,52 @@
   }
 }
 ```
+
+### Snippets de Test de Routes
+
+```json
+{
+  "Angular Route Tests": {
+    "prefix": "ngRouteTests",
+    "body": [
+      "import { Location } from \"@angular/common\";",
+      "import { TestBed } from \"@angular/core/testing\";",
+      "import { routes } from \"./app.routes\";",
+      "import { provideRouter, Router } from \"@angular/router\";",
+      "",
+      "describe('Route: App', () => {",
+      "",
+      "  let router: Router;",
+      "  let location: Location;",
+      "",
+      "  beforeEach(async () => {",
+      "    // Configurar el entorno de pruebas con las rutas",
+      "    await TestBed.configureTestingModule({",
+      "      providers: [ provideRouter(routes) ] // 👈 Proveer las rutas reales",
+      "    });",
+      "",
+      "    router = TestBed.inject(Router);",
+      "    location = TestBed.inject(Location);",
+      "  });",
+      "",
+      "  it('should have a route for \"about\" to AboutPageComponent (\"/about\")', async () => {",
+      "    await router.navigate(['about']);",
+      "    expect(location.path()).toBe('/about');",
+      "  });",
+      "  it('should redirect \"unkown\" to AboutPageComponent (\"/about\")', async () => {",
+      "    await router.navigate(['unkown']);",
+      "    expect(location.path()).toBe('/about');",
+      "  });",
+      "",
+      "  it('should have a route for \"pokemons/page/1\" to PokemonsPageComponent (\"/pokemons/page/1\")', async () => {",
+      "    await router.navigate(['pokemons/page/1']);",
+      "    expect(location.path()).toBe('/pokemons/page/1');",
+      "  });",
+      "",
+      "});"
+    ],
+    "description": "Genera un test base para comprobar rutas en Angular con provideRouter"
+  }
+}
+
+```
