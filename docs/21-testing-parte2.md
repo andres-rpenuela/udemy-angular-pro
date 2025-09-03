@@ -1,6 +1,6 @@
 # Testing parte 2.
 
-Errores comunes en la aplicació de Angular 20+ SSR 
+Errores comunes en la aplicación de Angular 20+ SSR 
 
 ##  Error NG0201 No provider found for ActivatedRoute 
 
@@ -135,7 +135,7 @@ import 'zone.js/testing';
     }
     }
     ```
-    Puede que se se neceiste instalar solo para los test la dependneiz de `npm install zone.js --save-dev`
+    Puede que se se neceiste instalar solo para los test la dependencia de `npm install zone.js --save-dev`
     
 > 🔎 Nota: Qué hace tu tsconfig.spec.json
 > * Extiende de tsconfig.json → hereda paths, strict mode, etc.
