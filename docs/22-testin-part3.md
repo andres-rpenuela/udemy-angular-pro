@@ -604,3 +604,141 @@ it('should render pokemon name', () => {
 5. Validar que el renderizado coincida con el valor del input.
 
 ---
+
+# NG-REFLECT de ROUTER-LINK
+Cuando Angular renderiza un componente con @Input() o directivas (como routerLink), en el DOM de pruebas (cuando usas fixture.nativeElement) se ve un atributo auxiliar llamado ng-reflect-....
+
+👉 Ejemplo:
+
+Si tu template tiene algo así:
+```html
+<a [routerLink]="['/pokemons', pokemon().id]">
+  {{ pokemon().name }}
+</a>
+```
+
+En el test, Angular generará algo como:
+
+```html
+<a ng-reflect-router-link="/pokemons/1">bulbasaur</a>
+```
+
+El atributo ng-reflect-router-link es solo para depuración y pruebas. En producción no existe.
+
+El test se vería:
+
+```ts
+it('should have the proper ng-reflect-router-link', () => {
+  // busca el enlace
+  const anchor: HTMLAnchorElement | null = compiled.querySelector('a');
+
+  expect(anchor).not.toBeNull();
+  expect(anchor?.getAttribute('ng-reflect-router-link'))
+    .toBe(`/pokemons/${mockPokemon.id}`);
+});
+```
+
+## 🔹 Alternativa más robusta (sin ng-reflect-*) (Opcion recomenda)
+
+Como ng-reflect-router-link no existe en producción, la mejor práctica es testear el valor real del RouterLink directive.
+Para eso, Angular ofrece By.directive(RouterLink) con DebugElement.
+
+Ejemplo:
+```ts
+import { By } from '@angular/platform-browser';
+import { RouterLink } from '@angular/router';
+
+it('should navigate to the correct route when clicking the link', () => {
+  const debugEl = fixture.debugElement.query(By.directive(RouterLink));
+  const routerLinkInstance = debugEl.injector.get(RouterLink);
+  const routerLinkInstance2 = debugEl.injector.get(RouterLinkWithHref) as any;
+  console.log(routerLinkInstance)
+  console.log(routerLinkInstance2)
+
+  //expect(routerLinkInstance['routerLinkInput']).toEqual(['/pokemon', mockPokemon.name]); // nulo en Angular 20
+  expect(routerLinkInstance['commands']).toEqual(['/pokemons', mockPokemon.id]); // funciona en Angular 20
+});
+```
+
+🔑 Resumen:
+
+* ng-reflect-router-link es solo un atributo auxiliar que Angular pinta en el DOM en modo test/debug.
+* Puedes testearlo directamente con getAttribute('ng-reflect-router-link').
+* Pero lo más recomendable en proyectos grandes es usar By.directive(RouterLink) para testear el valor real del RouterLink.
+
+----
+
+# Acceso al elemento `img`
+
+Quieres obtener la referencia a la imagen del Pokémon (<img>) en tu test.
+
+En tu template tienes esto:
+
+<img
+  class="w-24 h-24"
+  width="96px"
+  height="96px"
+  [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokemon().id + '.png'"
+  [alt]="pokemon().name"
+  #pokemonImg>
+
+### Opción 1: Usando querySelector
+
+En tu test puedes acceder al <img> directamente por la etiqueta:
+
+```html
+it('should render the pokemon image with correct src and alt', () => {
+  const img: HTMLImageElement | null = compiled.querySelector('img');
+
+  expect(img).not.toBeNull();
+  expect(img?.src).toContain(mockPokemon.id); // que el src incluya el ID
+  expect(img?.alt).toBe(mockPokemon.name);   // que el alt sea el nombre
+});
+```
+
+### Opción 2: Usando data-testid (más robusto)
+
+Modifica tu HTML para agregar un identificador de test:
+```html
+<img
+  data-testid="pokemon-img"
+  class="w-24 h-24"
+  width="96px"
+  height="96px"
+  [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + pokemon().id + '.png'"
+  [alt]="pokemon().name">
+```
+
+Y en el test:
+```ts
+const img: HTMLImageElement | null = compiled.querySelector('[data-testid="pokemon-img"]');
+
+expect(img).not.toBeNull();
+expect(img?.src).toBe(
+  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${mockPokemon.id}.png`
+);
+expect(img?.alt).toBe(mockPokemon.name);
+```
+
+> 👉 Yo recomiendo usar data-testid para que tus tests no dependan de clases de Tailwind ni del orden de elementos.
+
+
+--- 
+
+# Acceso por nombre de clases
+
+Si En tu querySelector estás usando directamente las clases de Tailwind como si fueran un selector de CSS:
+
+```ts
+compiled.querySelector('font-bold text-xl mb-2 text-center capitalize')
+```
+
+👉 Esto no es válido en CSS, porque querySelector espera selectores como .miClase o div.miClase.
+
+En tu caso deberías poner `.` antes de cada clase si quieres encadenar clases. Ejemplo:
+
+```ts
+compiled.querySelector('.font-bold.text-xl.mb-2.text-center.capitalize');
+```
+
+---
