@@ -742,3 +742,5 @@ compiled.querySelector('.font-bold.text-xl.mb-2.text-center.capitalize');
 ```
 
 ---
+
+## Test de Servicios con peticiones HTTP
