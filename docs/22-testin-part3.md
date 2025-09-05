@@ -743,4 +743,529 @@ compiled.querySelector('.font-bold.text-xl.mb-2.text-center.capitalize');
 
 ---
 
-## Test de Servicios con peticiones HTTP
+# 📌 Testing en Angular: HttpClient + ActivatedRoute + rxResource
+
+**Tests con HttpClient, ActivatedRoute y rxResource en Angular** 👇
+
+## 1. 🛠️ Configuración básica de TestBed con HttpClient
+
+Para testear servicios que hacen peticiones HTTP:
+
+```ts
+beforeEach(() => {
+  TestBed.configureTestingModule({
+    providers: [
+      provideHttpClient(),        // HttpClient real
+      provideHttpClientTesting(), // Mock de HttpClient
+    ],
+  });
+
+  service = TestBed.inject(PokemonsService);
+  httpMock = TestBed.inject(HttpTestingController);
+});
+
+afterEach(() => {
+  httpMock.verify(); // Verifica que no queden requests pendientes
+});
+```
+
+---
+
+## 2. ✅ Test de un servicio con HttpClient
+
+Ejemplo: `PokemonsService.loadPage(page)`
+
+```ts
+it('loadPage(1) debería devolver pokemons', () => {
+  service.loadPage(1).subscribe((pokemons) => {
+    expect(pokemons).toEqual(expectedSimplePokemons);
+  });
+
+  const req = httpMock.expectOne(
+    'https://pokeapi.co/api/v2/pokemon/?limit=20&offset=0'
+  );
+  expect(req.request.method).toBe('GET');
+
+  // Simula respuesta
+  req.flush(mockResponse);
+});
+```
+
+📍 Claves:
+
+* `expectOne(url)` → intercepta la request.
+* `req.flush(mockResponse)` → responde con el mock.
+
+---
+
+## 3. 🧭 Mock de ActivatedRoute con `BehaviorSubject`
+
+Para simular parámetros de ruta dinámicos:
+
+```ts
+const paramMap$ = new BehaviorSubject(
+  new Map([['id', 'bulbasaur']]) // valor inicial
+);
+
+{
+  provide: ActivatedRoute,
+  useValue: {
+    paramMap: paramMap$.asObservable(),
+    snapshot: {
+      paramMap: {
+        get: (key: string) => paramMap$.value.get(key),
+      },
+    },
+  },
+}
+```
+
+🔹 Así puedes cambiar dinámicamente el `id` en los tests con:
+
+```ts
+paramMap$.next(new Map([['id', 'ivysaur']]));
+```
+
+---
+
+## 4. ⚡ Test de un componente con `rxResource`
+
+Ejemplo: `PokemonPageComponent`
+
+```ts
+it('debería reaccionar cuando cambia el id en paramMap', fakeAsync(() => {
+  // 1️⃣ Cambiar id simulado
+  paramMap$.next(new Map([['id', 'bulbasaur']]));
+  fixture.detectChanges();
+
+  // 2️⃣ Forzar reload del recurso
+  component.pokemon.reload();
+
+  // 3️⃣ Interceptar request
+  const req = httpMock.expectOne('https://pokeapi.co/api/v2/pokemon/bulbasaur');
+  req.flush(bulbasaurMock);
+
+  // 4️⃣ Avanzar ciclo de detección
+  tick();
+  fixture.detectChanges();
+
+  // 5️⃣ Verificar valor
+  const value = component.pokemon.value();
+  expect(value.id).toBe(1);
+  expect(value.name).toBe('bulbasaur');
+}));
+```
+
+---
+
+## 5. 🚦 Test de navegación con Router
+
+Para comprobar que un componente llama a `router.navigate`:
+
+```ts
+{
+  provide: Router,
+  useValue: jasmine.createSpyObj('Router', ['navigate']),
+}
+```
+
+Ejemplo:
+
+```ts
+it('debería navegar usando Router.navigate', () => {
+  const router = TestBed.inject(Router);
+
+  router.navigate(['/pokemons', 99]);
+
+  expect(router.navigate).toHaveBeenCalledWith(['/pokemons', 99]);
+  expect(component.pokemon.value()).toEqual({} as Pokemon); // defaultValue
+});
+```
+
+---
+
+## 📚 Resumen de buenas prácticas
+
+* ✅ Usar `provideHttpClientTesting()` en servicios/componentes con `HttpClient`.
+* ✅ Siempre llamar a `httpMock.verify()` en `afterEach()`.
+* ✅ Para rutas dinámicas → usar `BehaviorSubject` con `ActivatedRoute.paramMap`.
+* ✅ Con `rxResource`, usar `component.pokemon.reload()` + `tick()` en tests asincrónicos.
+* ✅ Para navegación → mockear `Router` con `jasmine.createSpyObj`.
+
+---
+
+# 📝 Testing de peticiones **POST** en Angular
+
+Caso de **testear un `POST` con HttpClient** en Angular:
+
+
+## 1. Servicio con POST
+
+Supongamos que tienes un servicio que crea un Pokémon:
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class PokemonsService {
+  private readonly baseUrl = 'https://pokeapi.co/api/v2/pokemon';
+
+  constructor(private http: HttpClient) {}
+
+  createPokemon(pokemon: SimplePokemon) {
+    return this.http.post<SimplePokemon>(this.baseUrl, pokemon);
+  }
+}
+```
+
+---
+
+## 2. Test de un POST con `HttpTestingController`
+
+En el test:
+
+```ts
+it('debería enviar un POST para crear un pokemon', () => {
+  const newPokemon: SimplePokemon = { id: '99', name: 'mew' };
+
+  service.createPokemon(newPokemon).subscribe((resp) => {
+    expect(resp).toEqual(newPokemon);
+  });
+
+  // Intercepta la petición
+  const req = httpMock.expectOne('https://pokeapi.co/api/v2/pokemon');
+  expect(req.request.method).toBe('POST');
+  expect(req.request.body).toEqual(newPokemon); // ✅ comprueba el payload
+
+  // Responde con el mock
+  req.flush(newPokemon);
+});
+```
+
+📍 Claves:
+
+* `req.request.method` debe ser `'POST'`.
+* `req.request.body` permite verificar lo que el servicio está enviando.
+* `req.flush(mock)` simula la respuesta de la API.
+
+---
+
+## 3. POST con error simulado
+
+También puedes probar errores:
+
+```ts
+it('debería manejar error en POST', () => {
+  const newPokemon: SimplePokemon = { id: '100', name: 'missingno' };
+
+  service.createPokemon(newPokemon).subscribe({
+    next: () => fail('debería fallar'),
+    error: (err) => {
+      expect(err.status).toBe(400);
+      expect(err.error).toBe('Invalid data');
+    },
+  });
+
+  const req = httpMock.expectOne('https://pokeapi.co/api/v2/pokemon');
+  req.flush('Invalid data', { status: 400, statusText: 'Bad Request' });
+});
+```
+
+---
+
+## 📚 Resumen para **POST en tests**
+
+* ✅ Usar `httpMock.expectOne(url)` como en `GET`.
+* ✅ Verificar `req.request.method === 'POST'`.
+* ✅ Usar `req.request.body` para validar el payload.
+* ✅ Simular respuesta con `req.flush(mockResponse)`.
+* ✅ Simular error con `req.flush(errorBody, { status, statusText })`.
+
+---
+
+# 📝 Testing `POST` con **ActivatedRoute** + `rxResource`
+
+Ejemplo completo de **POST + ActivatedRoute + `rxResource`** para que quede como apunte práctico.
+
+## 1. Componente con `rxResource` y POST
+
+Imaginemos que tu página permite **crear un Pokémon** a partir de un `id` de la ruta:
+
+```ts
+@Component({
+  standalone: true,
+  selector: 'app-pokemon-create',
+  template: `
+    <button (click)="create()">Crear Pokémon</button>
+    <pre>{{ pokemon.value() | json }}</pre>
+  `,
+})
+export class PokemonCreateComponent {
+  private http = inject(HttpClient);
+  private route = inject(ActivatedRoute);
+
+  // Resource: simula el POST al servidor
+  public pokemon = rxResource<SimplePokemon, { id: string | null }>({
+    params: () => ({ id: null }), // dummy inicial
+    stream: ({ params }) =>
+      this.route.paramMap.pipe(
+        switchMap((map) => {
+          const id = map.get('id');
+          if (!id) throw new Error('No id');
+          const newPokemon: SimplePokemon = { id, name: 'bulbasaur' };
+          return this.http.post<SimplePokemon>(
+            'https://pokeapi.co/api/v2/pokemon',
+            newPokemon
+          );
+        })
+      ),
+    defaultValue: {} as SimplePokemon,
+  });
+
+  create() {
+    this.pokemon.reload();
+  }
+}
+```
+
+---
+
+## 2. Test del componente
+
+```ts
+describe('PokemonCreateComponent', () => {
+  let fixture: ComponentFixture<PokemonCreateComponent>;
+  let component: PokemonCreateComponent;
+  let httpMock: HttpTestingController;
+
+  // 🔹 paramMap simulado
+  const paramMap$ = new BehaviorSubject(new Map([['id', '99']]));
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [PokemonCreateComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: paramMap$.asObservable(),
+            snapshot: {
+              paramMap: { get: (key: string) => paramMap$.value.get(key) },
+            },
+          },
+        },
+      ],
+    });
+
+    fixture = TestBed.createComponent(PokemonCreateComponent);
+    component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  it('debería hacer POST cuando se llama create()', fakeAsync(() => {
+    // 1️⃣ Ejecutar la acción
+    component.create();
+
+    // 2️⃣ Interceptar el POST
+    const req = httpMock.expectOne('https://pokeapi.co/api/v2/pokemon');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ id: '99', name: 'bulbasaur' });
+
+    // 3️⃣ Simular respuesta de la API
+    req.flush({ id: '99', name: 'bulbasaur' });
+
+    // 4️⃣ Avanzar el ciclo
+    tick();
+    fixture.detectChanges();
+
+    // 5️⃣ Validar que el resource recibió el valor
+    const value = component.pokemon.value();
+    expect(value).toEqual({ id: '99', name: 'bulbasaur' });
+  }));
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+});
+```
+
+---
+
+## 📚 Resumen
+
+* `rxResource` también sirve para **POST**, basta con devolver un `http.post(...)` en `stream`.
+* Usamos `paramMap` de `ActivatedRoute` para **obtener el id de la ruta**.
+* En el test:
+
+  1. Se cambia el `paramMap$` si hace falta.
+  2. Se llama a `component.pokemon.reload()` o a un método (`create()`) que dispare el `resource`.
+  3. Se usa `httpMock.expectOne()` para capturar el **POST**.
+  4. Se valida el `body`.
+  5. Se simula respuesta con `req.flush(...)`.
+  6. Se avanza el tiempo con `tick()` y se valida el valor del `resource`.
+
+
+---
+
+# 🧪 Angular Testing Cheatsheet — HTTP + ActivatedRoute + rxResource (Resuemn con ejemplo)
+
+* ✅ `GET` con `HttpClient` + `HttpTestingController`
+* ✅ `POST` con `HttpClient` + `ActivatedRoute`
+* ✅ Uso de `rxResource`
+* ✅ Manejo de **errores en rutas** (`404`, `500`)
+
+## 1. Test de servicios con `HttpClient`
+
+Ejemplo: **PokemonsService.loadPage(page: number)**
+
+```ts
+it('loadPage(1) debería devolver lista de pokemons', () => {
+  service.loadPage(1).subscribe((pokemons) => {
+    expect(pokemons).toEqual(expectedSimplePokemons);
+  });
+
+  const req = httpMock.expectOne('https://pokeapi.co/api/v2/pokemon/?limit=20&offset=0');
+  expect(req.request.method).toBe('GET');
+
+  req.flush(mockResponse); // 🔹 simula respuesta
+});
+```
+
+👉 Tips:
+
+* `expectOne(url)` intercepta la request.
+* `req.flush(data)` simula respuesta.
+* `httpMock.verify()` asegura que no quedan requests pendientes.
+
+---
+
+## 2. Componente con `rxResource` y `GET` desde ruta
+
+```ts
+public pokemon = rxResource<Pokemon, { id: string | null }>({
+  params: () => ({ id: null }),
+  stream: () =>
+    this.route.paramMap.pipe(
+      switchMap((map) => {
+        const id = map.get('id');
+        if (!id) throw new Error('No id');
+        return this.http.get<Pokemon>(`https://pokeapi.co/api/v2/pokemon/${id}`);
+      })
+    ),
+  defaultValue: {} as Pokemon,
+});
+```
+
+### Test
+
+```ts
+it('debería reaccionar cuando cambia el id en paramMap', fakeAsync(() => {
+  paramMap$.next(new Map([['id', 'bulbasaur']])); // simular ruta
+  fixture.detectChanges();
+
+  component.pokemon.reload();
+
+  const req = httpMock.expectOne('https://pokeapi.co/api/v2/pokemon/bulbasaur');
+  req.flush(bulbasaurMock);
+
+  tick();
+  expect(component.pokemon.value().name).toBe('bulbasaur');
+}));
+```
+
+---
+
+## 3. Componente con `rxResource` y `POST`
+
+```ts
+public pokemon = rxResource<SimplePokemon, { id: string | null }>({
+  params: () => ({ id: null }),
+  stream: () =>
+    this.route.paramMap.pipe(
+      switchMap((map) => {
+        const id = map.get('id');
+        const newPokemon: SimplePokemon = { id: id!, name: 'bulbasaur' };
+        return this.http.post<SimplePokemon>(
+          'https://pokeapi.co/api/v2/pokemon',
+          newPokemon
+        );
+      })
+    ),
+  defaultValue: {} as SimplePokemon,
+});
+
+create() {
+  this.pokemon.reload(); // dispara el POST
+}
+```
+
+### Test
+
+```ts
+it('debería hacer POST al crear', fakeAsync(() => {
+  component.create();
+
+  const req = httpMock.expectOne('https://pokeapi.co/api/v2/pokemon');
+  expect(req.request.method).toBe('POST');
+  expect(req.request.body).toEqual({ id: '99', name: 'bulbasaur' });
+
+  req.flush({ id: '99', name: 'bulbasaur' });
+  tick();
+
+  expect(component.pokemon.value()).toEqual({ id: '99', name: 'bulbasaur' });
+}));
+```
+
+---
+
+## 4. Manejo de errores de rutas (404 / 500)
+
+Ejemplo: verificar que el **resource capture el error**.
+
+```ts
+it('debería manejar error 404 al buscar pokemon', fakeAsync(() => {
+  paramMap$.next(new Map([['id', 'missingno']])); // ruta con ID inválido
+  fixture.detectChanges();
+
+  component.pokemon.reload();
+
+  const req = httpMock.expectOne('https://pokeapi.co/api/v2/pokemon/missingno');
+  req.flush({ message: 'Not Found' }, { status: 404, statusText: 'Not Found' });
+
+  tick();
+
+  // ⚡ pokemon.value() sigue en defaultValue
+  expect(component.pokemon.value()).toEqual({} as Pokemon);
+}));
+```
+
+👉 Puntos clave:
+
+* `req.flush(body, options)` permite simular un error (`status`, `statusText`).
+* El `rxResource` volverá a `defaultValue` o puedes manejar `.error` en el `resource`.
+
+---
+
+## 5. Navegación con Router (spies)
+
+```ts
+it('debería navegar usando Router.navigate', () => {
+  const router = TestBed.inject(Router);
+
+  router.navigate(['/pokemons', 99]);
+
+  expect(router.navigate).toHaveBeenCalledWith(['/pokemons', 99]);
+});
+```
+
+---
+
+## 📌 Resumen
+
+1. **GET tests**: interceptar con `expectOne(url)` y responder con `flush`.
+2. **POST tests**: validar `req.request.body`.
+3. **ActivatedRoute**: simular con `BehaviorSubject` y `.next(new Map([['id', 'x']]))`.
+4. **rxResource**: usar `reload()` para disparar manualmente.
+5. **Errores HTTP**: usar `req.flush(..., {status:404})`.
+6. **Router**: espiarlo con `jasmine.createSpyObj`.
+
