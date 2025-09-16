@@ -60,6 +60,7 @@ describe('PokemonPageComponent', () => {
 
 
   it('debería inicializar con defaultValue', () => {
+    //expect(component.pokemon.value()).toBeFalse(); // Descinebtar para comprobar que no se compila la al hacer:  ng test && ng build
     expect(component.pokemon.value()).toEqual({} as Pokemon);
   });
 
