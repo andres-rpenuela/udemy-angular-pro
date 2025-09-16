@@ -1,4 +1,4 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { SimplePokemon } from '@/pokemons/interfaces/simple-pokemon.interface';
 import { Meta, Title } from '@angular/platform-browser';
@@ -23,6 +23,9 @@ describe('PokemonPageComponent', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
+  // aseguar el valor inicion en cada test
+  paramMap$.next( new Map([['id', 'bulbasaur']]) );
+
   TestBed.configureTestingModule({
     imports: [PokemonPageComponent,],
     providers: [
@@ -95,15 +98,64 @@ describe('PokemonPageComponent', () => {
     router.navigate(['/pokemons', 99]);
 
     expect(router.navigate).toHaveBeenCalledWith(['/pokemons', 99]);
-    console.log(component.pokemon.value())
+    //console.log(component.pokemon.value())
     expect(component.pokemon.value()).toEqual({} as Pokemon);
   });
+
+  it('capturar error si pokemon no se encuentra',fakeAsync(()=> {
+    const pokemonName = 'no-existo';
+
+    // 1️⃣ Cambiar id simulado
+    paramMap$.next( new Map([['id', pokemonName]]) );
+    fixture.detectChanges();
+
+    // 2️⃣ Forzar reload
+    component.pokemon.reload();
+
+    // 3️⃣ Interceptar la request
+    const req = httpMock.expectOne(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+    expect(req.request.method).toBe('GET');
+    req.flush('Not found', { status: 404, statusText: 'Not Found' });
+
+    // 4️⃣ Avanzar el ciclo de detección ()
+    tick();
+    fixture.detectChanges();
+
+    // 5️⃣ Ahora el resource ya tiene el valor
+    // si devuelve un error
+    expect(component.pokemon.error()).toBeTruthy(); // si usas throwError
+
+    // Si devuelve un objeto plano vacio
+    //const value = component.pokemon.value();
+    //expect(value).toEqual({} as Pokemon); // porque defaultValue es {}
+  }));
+
+  // este caso no se debe´ria dar, no se deben acepta llamadas al compoennte sin id
+  it('capturar vacío si pokemon id es nulo', fakeAsync(() => {
+    paramMap$.next(new Map([['id', '']]));
+    fixture.detectChanges();
+
+    component.pokemon.reload();
+    tick();
+    fixture.detectChanges();
+
+    // ✅ Como no hay id, NO se llama a la API
+    httpMock.expectNone('https://pokeapi.co/api/v2/pokemon/');
+
+    // ✅ El resource devuelve defaultValue
+    expect(component.pokemon.value()).toEqual({} as Pokemon);
+
+    // ✅ Estado debería ser success (porque value existe)
+    expect(component.pokemon.status()).toBe('resolved');
+  }));
+
 
   afterEach(() =>{
     // asegurar que no hay mas peticiones
     httpMock.verify();
     // restablecer las pruebas
     TestBed.resetTestingModule;
+
   })
 
 });
