@@ -4,10 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve -o --port 4200",
-    "build": "ng build",
+    "build": "npm run test && npm run prerender && ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:pokemon-ssr": "node dist/pokemon-ssr/server/server.mjs"
+    "test": "ng test --no-watch --no-progress --browsers=ChromeHeadless",
+    "serve:ssr:pokemon-ssr": "node dist/pokemon-ssr/server/server.mjs",
+    "prerender": "ng run pokemon:prerender --routes='/'"
   },
   "prettier": {
     "overrides": [
@@ -46,6 +47,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.8.2"
+    "typescript": "~5.8.2",
+    "zone.js": "^0.15.1"
   }
 }

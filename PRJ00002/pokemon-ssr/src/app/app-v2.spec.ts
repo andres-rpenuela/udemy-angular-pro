@@ -1,7 +1,8 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { App } from './app';
 import { provideRouter } from '@angular/router';
+import { NavbarComponent } from './shared/components/navbar/navbar.component';
 
 describe('App', () => {
 
@@ -10,14 +11,41 @@ describe('App', () => {
   let app: App;
   let compiled: HTMLElement;
 
+  // Componente mock para NavbarComponent
+  // se puede crear fuera del test
+  @Component({
+    selector: 'navbar',
+    template: '<div>Mock Navbar</div>'
+  })
+  class MockNavbarComponent {}
+
+
+  // test setup
   beforeEach(async () => {
+    // ! NO RECOMENDADO ya que no carga las depednecias que no se especifican
+    // TestBed.overrideComponent(App, {
+    //   set: {
+    //     imports: [MockNavbarComponent] // 👈 añade el componente mock, EL RESTO DE IMPORTOS DEL COMPONETE APP NO SE CARGAN
+    //     ,schemas: [CUSTOM_ELEMENTS_SCHEMA] // 👈 Que los elementos que no se carge no hacer nada como router-outlet
+    //   }
+    //  });
+    // ! Reomomendado para cargar los mock
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
         //provideZonelessChangeDetection(),
         provideRouter([]), // 👈 añade providers del router, unas rutas vacías
       ]
-    }).compileComponents();
+    })
+    .overrideComponent(App,{
+      add: {
+        imports: [MockNavbarComponent]
+      }, // 👈 añade el componente mock
+      remove: {
+        imports: [NavbarComponent] // 👈 elimina el componente real
+      }
+    })
+    .compileComponents();
 
     // Crear el componente y obtener la instancia y el elemento compilado
     fixture = TestBed.createComponent(App);
@@ -44,14 +72,10 @@ describe('App', () => {
     fixture.detectChanges(); // disparar la detección de cambios para actualizar el DOM, sin esto e1 queda en blanco y no carga
 
     expect(app.title()).toEqual('pokemon-ssr');
-    const el = compiled.querySelector(
-      '.text-white.font-bold.text-3xl.mb-4.lg\\:mb-0.hover\\:text-orange-600.hover\\:cursor-pointer'
-    );
-    expect(el).not.toBeNull();
-    expect(el?.classList.contains('font-bold')).toBeTrue();
-    expect(el?.textContent).toContain('Pokemon-ssr');
 
-    expect(compiled.querySelector('navbar')).toBeTruthy();
+    expect(compiled.querySelector('navbar')).toBeTruthy()
+    const navbar = compiled.querySelector('navbar') as HTMLElement;
+    expect(navbar.querySelector('div')?.textContent).toContain('Mock Navbar');
 
     expect(compiled.querySelector('router-outlet')).not.toBeNull();
 

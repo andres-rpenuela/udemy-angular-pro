@@ -3,10 +3,10 @@
   <!-- Pokemon Card -->
    @for ( pokemon of pokemons(); track $index) {
       <pokemon-card [pokemon]="pokemon"></pokemon-card>
+   } @empty {
+     <!-- Si no hay -->
+    <div class="col-span-5 text-center border-white h-28 flex justify-center items-center">
+      No hay pokemons!
+    </div>
    }
-
-  <!-- TODO: Si no hay -->
-  <!-- <div class="col-span-5 text-center border-white h-28 flex justify-center items-center">
-    No hay pokemons!
-  </div> -->
 </div>
