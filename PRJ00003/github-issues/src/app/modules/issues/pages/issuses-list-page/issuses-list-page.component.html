@@ -1,3 +1,23 @@
 <p>
   issuses-list-page works!
 </p>
+
+@if(getIssues().isLoading() ){
+  Cargando...
+}
+
+@if(getIssues().isError() ){
+  Error: {{ getIssues().error! }}
+}
+
+@if(getIssues().isSuccess() ){
+  <ul>
+    @for( issue of getIssues().data()! ;track $index ){
+      <li>
+        #{{ issue.number }} - {{ issue.title }}
+      </li>
+    }@empty {
+      <li>No hay issues</li>
+    }
+  </ul>
+}

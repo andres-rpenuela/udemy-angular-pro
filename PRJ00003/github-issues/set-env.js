@@ -14,28 +14,28 @@ const environments = [
     name: 'dev',
     file: 'environment.development.ts',
     production: false,
-    apiUrl: process.env.GITHUB_ANGULAR_PATH_BASE_DEV,
+    apiUrl: process.env.GITHUB_ANGULAR_PATH_BASE,
     companyName: process.env.COMPANY_NAME_DEV,
   },
   {
     name: 'staging',
     file: 'environment.staging.ts',
     production: false,
-    apiUrl: process.env.GITHUB_ANGULAR_PATH_BASE_STAGING,
+    apiUrl: process.env.GITHUB_ANGULAR_PATH_BASE,
     companyName: process.env.COMPANY_NAME_STAGING,
   },
   {
     name: 'prod',
     file: 'environment.prod.ts',
     production: true,
-    apiUrl: process.env.GITHUB_ANGULAR_PATH_BASE_PROD,
+    apiUrl: process.env.GITHUB_ANGULAR_PATH_BASE,
     companyName: process.env.COMPANY_NAME_PROD,
   },
    {
     name: 'base',
     file: 'environment.ts', // 👈 este es el que Angular importa siempre
     production: false,
-    apiUrl: process.env.GITHUB_ANGULAR_PATH_BASE_DEV, // por defecto apunta a dev
+    apiUrl: process.env.GITHUB_ANGULAR_PATH_BASE, // por defecto apunta a dev
     companyName: process.env.COMPANY_NAME_DEV,
   }
 ];

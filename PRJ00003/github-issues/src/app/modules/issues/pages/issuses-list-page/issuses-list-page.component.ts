@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { IssuesService } from '../../services/issues.service';
 
 @Component({
   selector: 'app-issuses-list-page',
@@ -7,9 +8,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export default class IssusesListPageComponent implements OnInit {
 
+  private issuesService = inject(IssuesService);
+
   constructor() { }
 
   ngOnInit() {
+  }
+
+  public getIssues(){
+    return this.issuesService.getAllIssues;
   }
 
 }
