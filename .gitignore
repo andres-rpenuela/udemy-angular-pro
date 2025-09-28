@@ -1,1 +1,6 @@
 *.lock
+PRJ00003/github-issues/.env
+PRJ00003/github-issues/src/environments/environment.development.ts
+PRJ00003/github-issues/src/environments/environment.prod.ts
+PRJ00003/github-issues/src/environments/environment.staging.ts
+PRJ00003/github-issues/src/environments/environment.ts

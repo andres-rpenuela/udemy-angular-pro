@@ -2,9 +2,15 @@
   "name": "github-issues",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve  --port 4200 -o",
-    "build": "ng build",
+    "init": "node set-env.js && ng serve -o --port 4200",
+    "start": "ng serve -o --port 4200",
+    "prebuild": "node set-env.js",
+    "build:dev": "npm run prebuild && ng build --configuration development",
+    "build:staging": "npm run prebuild && ng build --configuration staging",
+    "build:prod": "npm run prebuild && ng build --configuration production",
+    "serve:dev": "npm run prebuild && ng serve --configuration development -o --port 4200",
+    "serve:staging": "npm run prebuild && ng serve --configuration staging -o --port 4201",
+    "serve:prod": "npm run prebuild && ng serve --configuration production -o --port 4202",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -34,10 +40,12 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^20.0.0",
     "@angular/build": "^20.1.5",
     "@angular/cli": "^20.1.5",
     "@angular/compiler-cli": "^20.1.0",
     "@types/jasmine": "~5.1.0",
+    "dotenv": "^17.2.2",
     "jasmine-core": "~5.8.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
