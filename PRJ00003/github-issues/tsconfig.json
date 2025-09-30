@@ -9,12 +9,12 @@
       "@assets/*": ["src/assets/*"],
       "@helpers/*": ["src/app/helpers/*"],
       "@commons/*": ["src/app/commons/*"],
-      "@issues/*": ["src/app/models/issues/*"],
-      "@issues-actions/*": ["src/app/models/issues/actions/*"],
-      "@issues-components/*": ["src/app/models/issues/components/*"],
-      "@issues-interfaces/*": ["src/app/models/issues/interfaces/*"],
-      "@issues-pages/*": ["src/app/models/issues/pages/*"],
-      "@issues-services/*": ["src/app/models/issues/services/*"]
+      "@issues/*": ["src/app/modules/issues/*"],
+      "@issues-actions/*": ["src/app/modules/issues/actions/*"],
+      "@issues-components/*": ["src/app/modules/issues/components/*"],
+      "@issues-interfaces/*": ["src/app/modules/issues/interfaces/*"],
+      "@issues-pages/*": ["src/app/modules/issues/pages/*"],
+      "@issues-services/*": ["src/app/modules/issues/services/*"]
     },
     "strict": true,
     "noImplicitOverride": true,
