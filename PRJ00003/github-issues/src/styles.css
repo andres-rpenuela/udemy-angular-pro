@@ -4,7 +4,7 @@
 
 html,
 body {
-  @apply bg-gray-900 text-white py-4 px-4;
+  @apply py-4 px-4;
 }
 
 h1 {
@@ -12,7 +12,7 @@ h1 {
 }
 
 h2 {
-  @apply text-2xl font-bold text-gray-300 my-4;
+  @apply text-2xl font-bold text-blue-300 dark:text-white my-4;
 }
 
 h3 {

@@ -1,6 +1,6 @@
-<h1 class="text-3xl font-bold">
-GitHub Issues
-</h1>
+<div class="flex items-center justify-between">
+  <h1 class="text-3xl font-bold">GitHub Issues</h1>
+</div>
 <div class="h-14 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
 <br>
 <section class="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -26,8 +26,8 @@ GitHub Issues
     }@else if(getIssues().isSuccess() ){
       <ul>
         @for( issue of getIssues().data()! ;track issue.id ){
-          <!-- <issue-item [issue]="issue"></issue-item> -->
-           <li>Issues #{{ issue.number }} - {{ issue.title }}</li>
+          <issue-item [issue]="issue"></issue-item>
+           <!-- <li>Issues #{{ issue.number }} - {{ issue.title }}</li> -->
         }@empty {
           <li>No hay issues</li>
         }

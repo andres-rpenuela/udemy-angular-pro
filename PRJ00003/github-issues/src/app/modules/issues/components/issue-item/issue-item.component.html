@@ -1,0 +1,30 @@
+<div class="max-w-2xl mx-auto mt-6">
+  <div class="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6 border border-gray-200 dark:border-gray-700 flex gap-6 items-center transition-colors">
+    @if (issue().user.avatar_url) {
+      <img [src]="issue().user.avatar_url" alt="avatar" class="w-20 h-20 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm" />
+    }
+    <div class="flex-1">
+      <div class="flex items-center gap-3 mb-2">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 underline hover:cursor-pointer  hover:bg-blue-300 dark:hover:bg-sky-600" [routerLink]="['/issues', issue().number]">{{ issue().title }}</h2>
+        <span class="text-xs bg-blue-100 dark:bg-blue-900 dark:text-blue-200 text-blue-700 px-2 py-1 rounded-full">#{{ issue().id }}</span>
+      </div>
+      <div class="flex items-center gap-4 mb-2">
+        <span class="text-sm text-gray-600 dark:text-gray-300 font-medium flex items-center gap-1">
+          <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z"/></svg>
+          {{ issue().user.login }}
+        </span>
+        <span class="text-sm text-gray-500 dark:text-gray-400">{{ issue().created_at | date:'medium' }}</span>
+  <span class="text-sm text-gray-500 dark:text-gray-400">💬 {{ issue().comments }} comentarios</span>
+      </div>
+      <div class="text-gray-700 dark:text-gray-200 mt-2 line-clamp-3">
+        {{ issue().body ? (issue().body | slice:0:180) : '' }}
+        @if (issue().body && issue().body.length > 180) {
+          <span>...</span>
+        }
+      </div>
+      @for( label of issue().labels ; track label.id ){
+        <span class="inline-block bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs px-2 py-1 rounded-full mr-1 mt-2">{{ label.name }}</span>
+      }
+    </div>
+  </div>
+</div>

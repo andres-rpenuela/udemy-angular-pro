@@ -1,0 +1,24 @@
+<div class="max-w-2xl mx-auto mt-6">
+	<div class="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-6 border border-gray-200 dark:border-gray-700 flex gap-6 items-center transition-colors">
+		@if (comment().user.avatar_url) {
+			<img [src]="comment().user.avatar_url" alt="avatar" class="w-20 h-20 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm" />
+		}
+		<div class="flex-1">
+			<div class="flex items-center gap-3 mb-2">
+				<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ comment().title }}</h2>
+				<span class="text-xs bg-blue-100 dark:bg-blue-900 dark:text-blue-200 text-blue-700 px-2 py-1 rounded-full">#{{ comment().id }}</span>
+			</div>
+			<div class="flex items-center gap-4 mb-2">
+				<span class="text-sm text-gray-600 dark:text-gray-300 font-medium flex items-center gap-1">
+					<svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z"/></svg>
+					{{ comment().user.login }}
+				</span>
+				<span class="text-sm text-gray-500 dark:text-gray-400">{{ comment().created_at | date:'medium' }}</span>
+				<span class="text-sm text-gray-500 dark:text-gray-400">💬 {{ comment().comments }} comentarios</span>
+			</div>
+			<div class="text-gray-700 dark:text-gray-200 mt-2 line-clamp-3">
+				{{ comment().body ? (comment().body | slice:0:180) : '' }}<span *ngIf="comment().body && comment().body.length > 180">...</span>
+			</div>
+		</div>
+	</div>
+</div>

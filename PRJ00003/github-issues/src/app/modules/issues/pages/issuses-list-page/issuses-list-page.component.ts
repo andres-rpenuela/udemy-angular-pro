@@ -3,10 +3,11 @@ import { NgTemplateOutlet } from '@angular/common';
 import { LoaderComponent } from "@app/commons/loader/loader.component";
 import { IssuesService } from '@issues-services/issues.service';
 import { ModalErrorComponent } from "@app/commons/modal-error/modal-error.component";
+import { IssueItemComponent } from "../../components/issue-item/issue-item.component";
 
 @Component({
   selector: 'app-issuses-list-page',
-  imports: [NgTemplateOutlet, LoaderComponent, ModalErrorComponent],
+  imports: [NgTemplateOutlet, LoaderComponent, ModalErrorComponent, IssueItemComponent],
   templateUrl: './issuses-list-page.component.html',
   styleUrls: ['./issuses-list-page.component.css']
 })
