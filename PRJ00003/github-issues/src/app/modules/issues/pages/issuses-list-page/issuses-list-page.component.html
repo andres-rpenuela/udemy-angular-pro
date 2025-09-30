@@ -1,7 +1,45 @@
-<h1 class="text-3xl font-bold underline">
+<h1 class="text-3xl font-bold">
 GitHub Issues
 </h1>
 <div class="h-14 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+<br>
+<section class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+
+  <!-- Bontones para controlar el Estado (State)-->
+  <div class="flex flex-col col-span-3">
+    <div class="flex gap-2">
+      <button class="btn active">All</button>
+      <button class="btn">Open</button>
+      <button class="btn">Closed</button>
+    </div>
+  </div>
+
+  <!-- Listado -->
+  <div class="flex flex-col gap-2 col-span-2">
+    <h2 class="text-2xl font-bold">Issues<hr/>
+    </h2>
+
+    @if(getIssues().isLoading() ){
+      <ng-container *ngTemplateOutlet="loadingButton"></ng-container>
+    }@else if(getIssues().isError()) { <!-- si hay error -->
+      <ng-container *ngTemplateOutlet="errorTemplate"></ng-container>
+    }@else if(getIssues().isSuccess() ){
+      <ul>
+        @for( issue of getIssues().data()! ;track issue.id ){
+          <!-- <issue-item [issue]="issue"></issue-item> -->
+           <li>Issues #{{ issue.number }} - {{ issue.title }}</li>
+        }@empty {
+          <li>No hay issues</li>
+        }
+      </ul>
+    }
+
+  </div>
+  <!-- Labels -->
+  <div class="flex flex-col gap-2 col-span-1">
+    <h2 class="text-2xl font-bold">Labels <hr/></h2>
+  </div>
+</section>
 <!--
 @if(getIssues().isLoading() ){
   Cargando...
@@ -22,3 +60,24 @@ GitHub Issues
     }
   </ul>
 } -->
+
+<!-- Template reutilizable -->
+<ng-template #loadingButton>
+  <common-loader></common-loader>
+</ng-template>
+
+<ng-template #errorTemplate>
+  <!-- mediante un efecto, muestra el dialogo  -->
+      @if(mostrarModal()) {
+        <app-modal-error
+          [errorMessage]="mensajeError()"
+          (closed)="cerrarModal()">
+        </app-modal-error>
+      }
+      <!-- cuando se cierra el modal-->
+      @if(!mostrarModal() && mensajeError()) {
+        <div class="mt-4 p-3 bg-red-100 text-red-700 rounded shadow">
+          {{ mensajeError() }}
+        </div>
+      }
+</ng-template>

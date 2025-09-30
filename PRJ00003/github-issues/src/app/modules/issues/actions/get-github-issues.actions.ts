@@ -5,12 +5,15 @@ import { GitHubIssue } from "../interfaces/github-issue.interface";
 
 //https://api.github.com/repos/angular/angular/issues
 export const getGithubIssuesActions = async  () : Promise<GitHubIssue[]> =>  {
+  // debug para simular error y ver modal
+  //throw new Error("error inesperado");// o lanzar un mensaje personalizado
 
   await sleep(1500); // dealy de 1,5 s
 
   const url = `${environment.GITHUB_ANGULAR_PATH_BASE}/issues`;
 
   try{
+
     const data = await
       fetch(url, {
         headers: {
