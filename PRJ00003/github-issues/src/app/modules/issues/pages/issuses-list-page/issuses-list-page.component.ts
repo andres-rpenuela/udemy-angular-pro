@@ -4,10 +4,11 @@ import { LoaderComponent } from "@app/commons/loader/loader.component";
 import { IssuesService } from '@issues-services/issues.service';
 import { ModalErrorComponent } from "@app/commons/modal-error/modal-error.component";
 import { IssueItemComponent } from "../../components/issue-item/issue-item.component";
+import { LabelsSelectorComponent } from "../../components/labels-selector/labels-selector.component";
 
 @Component({
   selector: 'app-issuses-list-page',
-  imports: [NgTemplateOutlet, LoaderComponent, ModalErrorComponent, IssueItemComponent],
+  imports: [NgTemplateOutlet, LoaderComponent, ModalErrorComponent, IssueItemComponent, LabelsSelectorComponent],
   templateUrl: './issuses-list-page.component.html',
   styleUrls: ['./issuses-list-page.component.css']
 })
@@ -31,6 +32,11 @@ export default class IssusesListPageComponent implements OnInit {
   public getIssues(){
     return this.issuesService.getAllIssues;
   }
+
+  public getLabels(){
+    return this.issuesService.getAllLabels;
+  }
+
 
   public lanzarError(mensaje: string) {
     console.log('Lanzando error desde el componente padre: ', mensaje);

@@ -8,6 +8,7 @@ import {
   QueryClient
 } from '@tanstack/angular-query-experimental'
 import { withDevtools } from '@tanstack/angular-query-experimental/devtools'
+import { provideMarkdown } from 'ngx-markdown';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideTanStackQuery(
       new QueryClient(),
       withDevtools(() => ({ loadDevtools: 'auto' })),
-    )
+    ),
+    provideMarkdown()
   ]
 };

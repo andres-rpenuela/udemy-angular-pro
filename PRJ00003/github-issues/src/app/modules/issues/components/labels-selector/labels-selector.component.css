@@ -1,0 +1,11 @@
+/* afecta a todos los span **/
+/* span:hover {
+  background-color: var(--label-bg);
+  color: var(--label-text);
+} */
+
+/* afecto solo aquellos que empice por label-  **/
+[id^="label-"]:hover {
+  background-color: var(--label-bg);
+  color: var(--label-text);
+}

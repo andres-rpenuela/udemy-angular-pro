@@ -1,4 +1,4 @@
-import { sleep } from "@app/commons/sleep.helper";
+import { sleep } from "@app/helpers/sleep.helper";
 import { firstValueFrom } from "rxjs";
 import { environment } from "src/environments/environment.development"
 import { GitHubIssue } from "../interfaces/github-issue.interface";
