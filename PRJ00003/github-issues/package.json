@@ -1,0 +1,59 @@
+{
+  "name": "github-issues",
+  "version": "0.0.0",
+  "scripts": {
+    "init": "node set-env.js && ng serve -o --port 4200",
+    "start": "ng serve -o --port 4200",
+    "prebuild": "node set-env.js",
+    "build:dev": "npm run prebuild && ng build --configuration development",
+    "build:staging": "npm run prebuild && ng build --configuration staging",
+    "build:prod": "npm run prebuild && ng build --configuration production",
+    "serve:dev": "npm run prebuild && ng serve --configuration development -o --port 4200",
+    "serve:staging": "npm run prebuild && ng serve --configuration staging -o --port 4201",
+    "serve:prod": "npm run prebuild && ng serve --configuration production -o --port 4202",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "prettier": {
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/common": "^20.1.0",
+    "@angular/compiler": "^20.1.0",
+    "@angular/core": "^20.1.0",
+    "@angular/forms": "^20.1.0",
+    "@angular/platform-browser": "^20.1.0",
+    "@angular/router": "^20.1.0",
+    "@tanstack/angular-query-experimental": "^5.90.2",
+    "ngx-markdown": "^20.1.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular-builders/custom-webpack": "^20.0.0",
+    "@angular/build": "^20.1.5",
+    "@angular/cli": "^20.1.5",
+    "@angular/compiler-cli": "^20.1.0",
+    "@types/jasmine": "~5.1.0",
+    "autoprefixer": "^10.4.21",
+    "dotenv": "^17.2.2",
+    "jasmine-core": "~5.8.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.8.2"
+  }
+}

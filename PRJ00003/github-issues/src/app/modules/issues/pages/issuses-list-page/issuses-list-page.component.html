@@ -1,0 +1,76 @@
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 px-2 sm:px-0">
+  <h1 class="text-2xl sm:text-3xl font-bold">GitHub Issues</h1>
+</div>
+<div class="h-10 sm:h-14 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+<br>
+<section class="grid grid-cols-1 md:grid-cols-3 gap-2">
+  <!-- Bontones para controlar el Estado (State)-->
+  <div class="flex flex-col col-span-full px-1 sm:px-0">
+    <div class="flex flex-wrap gap-2">
+      <button class="btn active">All</button>
+      <button class="btn">Open</button>
+      <button class="btn">Closed</button>
+    </div>
+  </div>
+  <!-- Listado -->
+  <div class="flex flex-col gap-2 md:col-span-2 w-full min-w-0">
+    <h2 class="text-xl sm:text-2xl font-bold">Issues<hr/>
+    </h2>
+
+    @if(getIssues().isLoading() ){
+      <ng-container *ngTemplateOutlet="loadingButton"></ng-container>
+    }@else if(getIssues().isError()) {
+      <ng-container *ngTemplateOutlet="errorTemplate"></ng-container>
+    }@else if(getIssues().isSuccess() ){
+      <ul>
+        @for( issue of getIssues().data()! ;track issue.id ){
+          <issue-item [issue]="issue"></issue-item>
+        }@empty {
+          <li>No hay issues</li>
+        }
+      </ul>
+    }
+  </div>
+  <!-- Labels -->
+  <div class="flex flex-col gap-2 md:col-span-1 w-full min-w-0">
+    <h2 class="text-xl sm:text-2xl font-bold">Labels <hr/></h2>
+    @if(getLabels().isLoading() ){
+      <ng-container *ngTemplateOutlet="loadingButton"></ng-container>
+    }@else if(getLabels().isError()) {
+      <ng-container *ngTemplateOutlet="errorTemplate"></ng-container>
+    }@else if(getLabels().isSuccess() ){
+      <ul class="flex flex-wrap">
+        @for( label of getLabels().data()! ;track label.id ){
+          <ng-container *ngTemplateOutlet="labelTemplate; context: { label }"></ng-container>
+        }@empty {
+          <li>No hay Labels</li>
+        }
+      </ul>
+    }
+  </div>
+</section>
+
+<!-- Template reutilizable -->
+<ng-template #loadingButton>
+  <common-loader></common-loader>
+</ng-template>
+
+<ng-template #errorTemplate>
+  <!-- mediante un efecto, muestra el dialogo  -->
+      @if(mostrarModal()) {
+        <app-modal-error
+          [errorMessage]="mensajeError()"
+          (closed)="cerrarModal()">
+        </app-modal-error>
+      }
+      <!-- cuando se cierra el modal-->
+      @if(!mostrarModal() && mensajeError()) {
+        <div class="mt-4 p-3 bg-red-100 text-red-700 rounded shadow">
+          {{ mensajeError() }}
+        </div>
+      }
+</ng-template>
+
+<ng-template let-label="label" #labelTemplate>
+  <issues-labels-selector [labels]="[label]"></issues-labels-selector>
+</ng-template>

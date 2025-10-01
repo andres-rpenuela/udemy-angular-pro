@@ -35,3 +35,22 @@ Agregar en el archivo `tsconfig.json`, dentro de `compilerOptions`:
   }
 }
 ```
+
+Ejemplo: 
+
+```json
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+  "baseUrl": ".",
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@assets/*": ["src/assets/*"],
+      "@helpers/*": ["src/app/helpers/*"],
+      "@issues/*": ["src/app/modudels/issues/*"],
+      "@issues-services/*": ["src/app/modudels/issues/services/*"]
+    },
+  }
+  // ...
+}
+```

@@ -1,0 +1,33 @@
+<div class="max-w-2xl mx-auto mt-6 w-full px-1 sm:px-4">
+  <div class="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-3 sm:p-6 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-2 sm:gap-6 items-start sm:items-center transition-colors">
+    @if (issue().user.avatar_url) {
+      <img [src]="issue().user.avatar_url" alt="avatar" class="w-12 h-12 sm:w-20 sm:h-20 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm flex-shrink-0 mt-1 sm:mt-0" />
+    }
+    <div class="flex-1 w-full min-w-0">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1 sm:mb-2 min-w-0">
+        <h2 class="text-base sm:text-2xl font-bold text-gray-800 dark:text-gray-100 break-words leading-tight truncate hover:cursor-pointer" [routerLink]="['/issues', issue().number]">{{ issue().title }}</h2>
+        <span class="text-xs bg-blue-100 dark:bg-blue-900 dark:text-blue-200 text-blue-700 px-2 py-1 rounded-full mt-1 sm:mt-0">#{{ issue().id }}</span>
+      </div>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mb-1 sm:mb-2 min-w-0">
+        <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium flex items-center gap-1 min-w-0">
+          <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 hidden xs:inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <span class="truncate">{{ issue().user.login }}</span>
+        </span>
+        <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">{{ issue().created_at | date:'medium' }}</span>
+        <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">💬 {{ issue().comments }} comentarios</span>
+      </div>
+      <div class="text-gray-700 dark:text-gray-200 mt-1 sm:mt-2 line-clamp-3 text-xs sm:text-base break-words">
+        <markdown>{{ issue().body ? (issue().body | slice:0:120) : '' }}</markdown>
+        @if( issue().body && issue().body.length > 120) {
+          <span>...</span>
+        }
+      </div>
+      <div class="mt-2 flex flex-wrap gap-2">
+        @for(label of issue().labels; track label.id) {
+          <issues-labels-selector [labels]="[label!]"></issues-labels-selector>
+        } @empty {
+          <span class="text-xs text-gray-500 dark:text-gray-400">No labels</span>
+        }
+    </div>
+  </div>
+</div>

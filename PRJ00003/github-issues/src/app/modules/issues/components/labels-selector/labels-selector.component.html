@@ -1,0 +1,13 @@
+<div class="flex flex-wrap justify-center items-center gap-2">
+  @for(label of labels(); track label.id) {
+    <span
+      id="label-{{label.id}}"
+      class="inline-flex items-center px-3 py-1 m-1 border rounded-md text-sm font-medium cursor-pointer transition-colors duration-200"
+      [style.--label-bg]="'#' + label.color"
+      [style.--label-text]="getTextColor(label.color)"
+      style="border-color: var(--label-bg);"
+    >
+      {{ label.name }}
+    </span>
+  }
+</div>
