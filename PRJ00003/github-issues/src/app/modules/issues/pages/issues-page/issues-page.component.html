@@ -1,3 +1,36 @@
-<p>
-  issues-page works!
-</p>
+@if( issue.isLoading() ){
+  <common-loader></common-loader>
+}@else if (issue.data()) {
+  <div class="max-w-2xl mx-auto w-full mt-6 px-2 sm:px-4">
+    <div class="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-4 sm:p-6 border border-gray-200 dark:border-gray-700 flex flex-col relative transition-colors">
+      @if (issue.data()?.user?.avatar_url) {
+        <img [src]="issue.data()!.user.avatar_url" alt="avatar"
+          class="w-16 h-16 sm:w-24 sm:h-24 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm absolute -top-8 left-4 sm:left-6 bg-white dark:bg-gray-900 z-10" />
+      }
+      <div class="flex-1 w-full min-w-0 pt-10 sm:pt-12">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2 min-w-0">
+          <h2 class="text-lg sm:text-2xl font-bold text-gray-800 dark:text-gray-100 break-words truncate">{{ issue.data()?.title }}</h2>
+          <span class="text-xs bg-blue-100 dark:bg-blue-900 dark:text-blue-200 text-blue-700 px-2 py-1 rounded-full mt-1 sm:mt-0">#{{ issue.data()?.number }}</span>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mb-2 min-w-0">
+          <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium flex items-center gap-1 min-w-0">
+            <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 hidden xs:inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <span class="truncate">{{ issue.data()?.user?.login }}</span>
+          </span>
+          <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">{{ issue.data()?.created_at | date:'medium' }}</span>
+          <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">💬 {{ issue.data()?.comments }} comentarios</span>
+        </div>
+        <div class="text-gray-700 dark:text-gray-200 mt-1 sm:mt-2 text-xs sm:text-base break-words">
+          <markdown>{{ issue.data()?.body }}</markdown>
+        </div>
+        <div class="mt-2 flex flex-wrap gap-2">
+          @for(label of issue.data()!.labels; track label.id) {
+            <issues-labels-selector [labels]="[label!]" />
+          } @empty {
+            <span class="text-xs text-gray-500 dark:text-gray-400">No labels</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
