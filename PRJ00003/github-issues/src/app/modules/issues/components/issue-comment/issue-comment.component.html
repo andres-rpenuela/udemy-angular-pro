@@ -16,9 +16,27 @@
 				<span class="text-sm text-gray-500 dark:text-gray-400">{{ comment().created_at | date:'medium' }}</span>
 				<span class="text-sm text-gray-500 dark:text-gray-400">💬 {{ comment().comments }} comentarios</span>
 			</div>
-			<div class="text-gray-700 dark:text-gray-200 mt-2 line-clamp-3">
-				{{ comment().body ? (comment().body | slice:0:180) : '' }}<span *ngIf="comment().body && comment().body.length > 180">...</span>
-			</div>
+      <!-- @if( bodyFull() ) {
+        <div class="text-gray-700 dark:text-gray-200 mt-2">
+          <markdown>{{ comment().body }}</markdown>
+        </div>
+      }@else {
+        <div class="text-gray-700 dark:text-gray-200 mt-2 line-clamp-3">
+          <markdown>{{ comment().body ? (comment().body | slice:0:180) : '' }}</markdown>
+            @if( comment().body && comment().body.length > 180) {
+              <span>...</span>
+            }
+			  </div>
+      } -->
+      <div class="text-gray-700 dark:text-gray-200 mt-2 "
+        [ngClass]="[ bodyFull() ? '' : 'line-clamp-3']">
+          <markdown>
+            {{ comment().body ? (comment().body | slice:0:180) : '' }}
+            @if( !bodyFull() && comment().body && comment().body.length > 180) {
+              <span>...</span>
+            }
+          </markdown>
+			  </div>
 		</div>
 	</div>
 </div>

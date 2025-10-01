@@ -1,20 +1,22 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { IssuesService } from '../../services/issues.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, tap } from 'rxjs';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { MarkdownComponent } from "ngx-markdown";
 import { LabelsSelectorComponent } from '../../components/labels-selector/labels-selector.component';
 import { LoaderComponent } from '@app/commons/loader/loader.component';
+import { IssueCommentComponent } from "../../components/issue-comment/issue-comment.component";
+import { ModalErrorComponent } from "@app/commons/modal-error/modal-error.component";
 
 
 @Component({
   selector: 'app-issues-page',
   templateUrl: './issues-page.component.html',
   styleUrls: ['./issues-page.component.css'],
-  imports: [DatePipe, MarkdownComponent, LabelsSelectorComponent, LoaderComponent]
+  imports: [DatePipe, MarkdownComponent, LabelsSelectorComponent, LoaderComponent, IssueCommentComponent, ModalErrorComponent, NgTemplateOutlet]
 })
 export default class IssuesPageComponent implements OnInit {
   private http = inject(HttpClient);
@@ -58,7 +60,35 @@ export default class IssuesPageComponent implements OnInit {
   // solution: crear la query dentro del constructor o ngOnInit o en un campo inicializador
   public issue = this.issuesService.getIssueByNumber(this.issueNumber);
 
+  public comments = this.issuesService.getIssueCommentsByNumber(this.issueNumber);
+
+
   ngOnInit() {
   }
 
+  // gesion del modal de erro
+  public mostrarModal = signal<boolean>(false);
+  public mensajeError = signal<string>('');
+
+ private errorEffect = effect(() => {
+    if (this.issue.isError()) {
+      this.lanzarError(this.issue.error()?.message!);
+    }
+
+    if (this.comments.isError()) {
+      this.lanzarError(this.comments.error()?.message!);
+    }
+  });
+
+
+  public lanzarError(mensaje: string) {
+    console.log('Lanzando error desde el componente padre: ', mensaje);
+    this.mensajeError.set(mensaje ?? 'Ha ocurrido un error inesperado.');
+    this.mostrarModal.set(true);
+  }
+
+  public cerrarModal() {
+    console.log('Cerrando modal desde el componente padre');
+    this.mostrarModal.set(false);
+  }
 }

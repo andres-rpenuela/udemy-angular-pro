@@ -4,6 +4,7 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
 import { getGithubLabelsActions } from '../actions/get-github-labels.actions';
 import { HttpClient } from '@angular/common/http';
 import { getGitHubIssueByNumberAction } from '../actions/get-github-issue.action';
+import { getGitHubIssueCommentsByNumberAction } from '../actions/get-github-issue-comments.action';
 
 @Injectable({
   providedIn: 'root'
@@ -24,14 +25,26 @@ constructor() { }
     queryFn: () => getGithubLabelsActions() // peticion http
   }));
 
-  // Se reicbe el numero como señal para que si cambia el número, se vuelva a ejecutar la consulta
+  // Se recibe el numero como señal para que si cambia el número, se vuelva a ejecutar la consulta
   public getIssueByNumber = (issueNumber: Signal<number | null> ) => injectQuery(  () => ({
       queryKey:[`issue-${issueNumber()}`], // identificador con el que se cachea, consiste en un arreglo que genera una llave unica
       queryFn: () => {
-        if( issueNumber() == null) throw new Error('issue number not found');
+        //throw new Error('issue by number not found'); // Para simular un error
+        if( issueNumber() == null) throw new Error('issue by number not found');
         return getGitHubIssueByNumberAction(issueNumber()!, this.http);
       },
       enabled: !!issueNumber // solo se ejecuta si issueNumber es truthy (no null, undefined, 0, etc.)
     })
   );
-}
+
+
+  public getIssueCommentsByNumber = (issueNumber: Signal<number | null> ) =>  injectQuery(  () => ({
+      queryKey:[`issue-${issueNumber()}`,'comments'], // identificador con el que se cachea, consiste en un arreglo que genera una llave unica
+      queryFn: () => {
+        // throw new Error('issue comments by issue number not found'); // Para simular un error
+        if( issueNumber() == null) throw new Error('issue comments by number not found');
+        return getGitHubIssueCommentsByNumberAction(issueNumber()!, this.http);
+      },
+      enabled: !!issueNumber // solo se ejecuta si issueNumber es truthy (no null, undefined, 0, etc.)
+    })
+  )};

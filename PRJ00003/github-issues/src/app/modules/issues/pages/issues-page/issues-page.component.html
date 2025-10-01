@@ -1,4 +1,6 @@
-@if( issue.isLoading() ){
+@if( issue.error()){
+   <ng-container *ngTemplateOutlet="errorTemplate"></ng-container>
+}@else if( issue.isLoading() ){
   <common-loader></common-loader>
 }@else if (issue.data()) {
   <div class="max-w-2xl mx-auto w-full mt-6 px-2 sm:px-4">
@@ -33,4 +35,38 @@
       </div>
     </div>
   </div>
+
+  @if( comments.error()){
+   <ng-container *ngTemplateOutlet="errorTemplate"></ng-container>
+  }@else if( comments.isLoading() ){
+  <div class="max-w-2xl mx-auto mt-6">
+    <common-loader></common-loader>
+  </div>
+} @else if (comments.data()?.length) {
+  @for( comment of comments.data(); track comment.id ) {
+    <issue-comment [comment]="comment" [bodyFull]="true"></issue-comment>
+  }
+} @else {
+  <div class="max-w-2xl mx-auto mt-6">
+    <p class="text-center text-gray-500 dark:text-gray-400">No hay comentarios para este issue.</p>
+  </div>
 }
+
+}
+
+
+<ng-template #errorTemplate>
+  <!-- mediante un efecto, muestra el dialogo  -->
+      @if(mostrarModal()) {
+        <app-modal-error
+          [errorMessage]="mensajeError()"
+          (closed)="cerrarModal()">
+        </app-modal-error>
+      }
+      <!-- cuando se cierra el modal-->
+      @if(!mostrarModal() && mensajeError()) {
+        <div class="mt-4 p-3 bg-red-100 text-red-700 rounded shadow">
+          {{ mensajeError() }}
+        </div>
+      }
+</ng-template>
