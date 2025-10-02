@@ -152,11 +152,16 @@ export class MyComponent {
 
 ### Diferencias entre `host` y `@HostListener`
 
-* `host` es una forma declarativa útil para listeners simples o añadir atributos.
-* `@HostListener` es más flexible, permitiendo lógica más compleja y mejor organización.
+Ambos evitan tener que usar `addEventListener` o usar eventos en el template.
 
-Ambos evitan tener que usar `addEventListener`.
+* El parámetro `host` del decorador **@Component** se usa para agregar atributos, clases o listeners directamente al elemento host del componente en el DOM. Es una forma declarativa útil para listeners simples o añadir atributos. Por ejemplo, en tu código, se agregan clases CSS al host para estilos y animaciones.
 
+* El decorador `@HostListener` se usa para escuchar eventos del host (como mouseenter, click, etc.) y ejecutar métodos de la clase cuando ocurren esos eventos. es más flexible, permitiendo lógica más compleja y mejor organización
+
+En resumen, se recomienda
+
+* `host` en *@Component*: para definri atributos/estilos/eventos en el host.
+* `@HostListener`: ejecutar código cuando ocurre un evento en el host.
 ---
 
 ## Eventos DOM comunes

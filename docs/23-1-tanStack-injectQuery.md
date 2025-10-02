@@ -33,7 +33,7 @@ import { Signal } from '@angular/core';
 
 // issueNumber es un Signal<number | null>
 const issueQuery = (issueNumber: Signal<number | null>) => injectQuery(() => ({
-  queryKey: ['issue', issueNumber()],
+  queryKey: ['issue', issueNumber()], // Tipado estricco
   queryFn: () => getIssueByNumber(issueNumber()!),
   enabled: issueNumber() != null
 }));

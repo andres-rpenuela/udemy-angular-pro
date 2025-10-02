@@ -1,6 +1,6 @@
-import { inject, Injectable, Signal } from '@angular/core';
+import { inject, Injectable, signal, Signal } from '@angular/core';
 import { getGithubIssuesActions } from '../actions/get-github-issues.actions';
-import { injectQuery } from '@tanstack/angular-query-experimental';
+import { injectQuery, injectQueryClient, QueryClient } from '@tanstack/angular-query-experimental';
 import { getGithubLabelsActions } from '../actions/get-github-labels.actions';
 import { HttpClient } from '@angular/common/http';
 import { getGitHubIssueByNumberAction } from '../actions/get-github-issue.action';
@@ -11,7 +11,10 @@ import { getGitHubIssueCommentsByNumberAction } from '../actions/get-github-issu
 })
 export class IssuesService {
 
-constructor() { }
+  // tanstack query client
+  private queryClient = inject(QueryClient);
+
+  constructor() { }
 
   private http = inject(HttpClient);
 
@@ -33,7 +36,8 @@ constructor() { }
         if( issueNumber() == null) throw new Error('issue by number not found');
         return getGitHubIssueByNumberAction(issueNumber()!, this.http);
       },
-      enabled: !!issueNumber // solo se ejecuta si issueNumber es truthy (no null, undefined, 0, etc.)
+      enabled: !!issueNumber, // solo se ejecuta si issueNumber es truthy (no null, undefined, 0, etc.)
+      staleTime: 1000 * 60 * 5 // 5 minutos, tiempo que dura en estar "fresco" el query
     })
   );
 
@@ -47,4 +51,17 @@ constructor() { }
       },
       enabled: !!issueNumber // solo se ejecuta si issueNumber es truthy (no null, undefined, 0, etc.)
     })
-  )};
+  )
+  // Método para invalidar la cache de un query en específico
+  public prefetchIssueByNumber(issueNumber: number) {
+    // Convertir el número a una señal
+    const issueNumberSignal = signal(issueNumber);
+    // Usa this.queryClient.prefetchQuery en lugar de injectQuery
+    this.queryClient.prefetchQuery({
+      queryKey: [`issue-${issueNumberSignal()}`], // mismo queryKey que en getIssueByNumber
+      queryFn: () => getGitHubIssueByNumberAction(issueNumberSignal(), this.http),
+      staleTime: 1000 * 60 * 5 // 5 minutos, tiempo que dura en estar "fresco" el query
+    });
+  }
+
+}
