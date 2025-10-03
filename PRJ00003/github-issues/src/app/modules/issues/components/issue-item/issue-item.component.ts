@@ -28,7 +28,13 @@ export class IssueItemComponent implements OnInit {
   // Prefetch al pasar el mouse por encima del host
   @HostListener('mouseenter') // Esto eliminala neceista de usar (mouseenter) en el HTML
   prefetchData() {
-    this.issueService.prefetchIssueByNumber(this.issue().number);
+    // Hay dos opciones:
+
+    // acciendo una peticion para precargar los datos del issue al pasar el mouse por encima
+    //this.issueService.prefetchIssueByNumber(this.issue().number);
+
+    // Actualiza la cache con los datos actuales del issue
+    this.issueService.setIssueData(this.issue());
   }
 
 }

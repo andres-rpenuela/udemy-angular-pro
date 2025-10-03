@@ -5,6 +5,7 @@ import { getGithubLabelsActions } from '../actions/get-github-labels.actions';
 import { HttpClient } from '@angular/common/http';
 import { getGitHubIssueByNumberAction } from '../actions/get-github-issue.action';
 import { getGitHubIssueCommentsByNumberAction } from '../actions/get-github-issue-comments.action';
+import { GitHubIssue } from '../interfaces/github-issue.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -62,6 +63,21 @@ export class IssuesService {
       queryFn: () => getGitHubIssueByNumberAction(issueNumberSignal(), this.http),
       staleTime: 1000 * 60 * 5 // 5 minutos, tiempo que dura en estar "fresco" el query
     });
+
   }
+
+  // ideal para acutlaizar los datos, evita hacer una petición http si los datos están frescos
+  public setIssueData(issue:GitHubIssue) {
+
+    const issueNumberSignal = signal(issue.number);
+
+    this.queryClient.setQueryData(
+      [`issue-${ issueNumberSignal() }`],
+      issue,
+      // en lugar de staleTime, se puede usar updatedAt para forzar que los datos estén "viejos" o nuevos y se actualicen en el background
+     { updatedAt: Date.now() + 1000 * 60 } // Hace que los datos tengan 1 minuto de validez, para que no estén "frescos" y se actualicen en el background
+    );
+  }
+
 
 }
