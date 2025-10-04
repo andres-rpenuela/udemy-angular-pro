@@ -1,11 +1,11 @@
-import { inject, Injectable, signal, Signal } from '@angular/core';
-import { getGithubIssuesActions } from '../actions/get-github-issues.actions';
+import { inject, Injectable, runInInjectionContext, signal, Signal } from '@angular/core';
+import { getGithubIssuesActions, getGithubIssuesActionsByState } from '../actions/get-github-issues.actions';
 import { injectQuery, injectQueryClient, QueryClient } from '@tanstack/angular-query-experimental';
 import { getGithubLabelsActions } from '../actions/get-github-labels.actions';
 import { HttpClient } from '@angular/common/http';
 import { getGitHubIssueByNumberAction } from '../actions/get-github-issue.action';
 import { getGitHubIssueCommentsByNumberAction } from '../actions/get-github-issue-comments.action';
-import { GitHubIssue } from '../interfaces/github-issue.interface';
+import { GitHubIssue, State } from '../interfaces/github-issue.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -19,16 +19,46 @@ export class IssuesService {
 
   private http = inject(HttpClient);
 
-  public getAllIssues = injectQuery( () =>({
-    queryKey: ['allIssues'], // identificador con el que se cachea, consiste en un arreglo que genera una llave unica
-    queryFn: () => getGithubIssuesActions() // peticion http
+  // Descomentar si se queire usar
+  // public getAllIssues = injectQuery( () =>({
+  //   queryKey: ['allIssues'], // identificador con el que se cachea, consiste en un arreglo que genera una llave unica
+  //   queryFn: () => getGithubIssuesActions() // peticion http
+  // }));
+
+  // ERROR Error: NG0203: injectQuery() can only be used within an injection context such as a constructor, a factory function, a field initializer, or a function used with runInInjectionContext. Find more at https://angular.dev/errors/NG0203.
+  // public getAllIssuesByState = (state: Signal<State>) => injectQuery( () =>({
+  //   queryKey: ['allIssues', state()], // identificador con el que se cachea, consiste en un arreglo que genera una llave unica
+  //   queryFn: () => getGithubIssuesActionsByState(state()), // peticion http
+  //   enabled: !!state() // solo se ejecuta si state es truthy (no null, undefined, 0, etc.)
+  // }));
+  public stateSelected = signal<State>(State.All);
+
+  public getAllIssuesByState = injectQuery(() => ({
+    queryKey: ['allIssues', this.stateSelected()],
+    queryFn: () => getGithubIssuesActionsByState(this.stateSelected()),
+    enabled: !!this.stateSelected(),
+    staleTime: 1000 * 60 * 5 // 5 minutos, tiempo que dura en estar "fresco" el query
   }));
 
+  //   Solucion Usa field initializer o runInInjectionContext para mantener el contexto de inyección.
+
+  // EUsa un factory o helper que reciba la señal y ejecute el query dentro de un contexto de inyección, por ejemplo usando runInInjectionContext:
+  // public getAllIssuesByState = (state: Signal<State>) =>
+  //   runInInjectionContextt(inject(IssuesService), () =>
+  //     injectQuery(() => ({
+  //       queryKey: ['allIssues', state()],
+  //       queryFn: () => getGithubIssuesActionsByState(state()),
+  //       enabled: !!state()
+  //     }))
+  //   );
+
+  /** Obtiene todas las etiquetas */
   public getAllLabels = injectQuery( () =>({
     queryKey: ['allLabels'], // identificador con el que se cachea, consiste en un arreglo que genera una llave unica
     queryFn: () => getGithubLabelsActions() // peticion http
   }));
 
+  /** Obtiene un issue por su número */
   // Se recibe el numero como señal para que si cambia el número, se vuelva a ejecutar la consulta
   public getIssueByNumber = (issueNumber: Signal<number | null> ) => injectQuery(  () => ({
       queryKey:[`issue-${issueNumber()}`], // identificador con el que se cachea, consiste en un arreglo que genera una llave unica
