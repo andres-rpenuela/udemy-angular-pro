@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { getGitHubIssueByNumberAction } from '../actions/get-github-issue.action';
 import { getGitHubIssueCommentsByNumberAction } from '../actions/get-github-issue-comments.action';
 import { GitHubIssue, State } from '../interfaces/github-issue.interface';
+import { getGithubIssuesActionsByStateAndLables } from '../actions/get-github-issues-filters';
 
 @Injectable({
   providedIn: 'root'
@@ -40,6 +41,36 @@ export class IssuesService {
     staleTime: 1000 * 60 * 5 // 5 minutos, tiempo que dura en estar "fresco" el query
   }));
 
+  // TODO: injectQuery para buscar issues por state y labels (reemplaza getAllIssuesByState que solo lo hace por state)
+  public labelsSelected = signal<string[]>([]);
+
+  public toggleLabel(labelName: string) {
+    // console.log('toggleLabel', labelName);
+    const labels = this.labelsSelected();
+    if (labels.includes(labelName)) {// remove label
+      this.labelsSelected.set(labels.filter(l => l !== labelName));
+    } else { // add lable
+      this.labelsSelected.set([...labels, labelName]);
+    }
+    console.log(this.labelsSelected());
+  }
+
+  public isLabelSelected(labelName: string): boolean {
+    // console.log('isLabelSelected', this.labelsSelected().includes(labelName) );
+    return this.labelsSelected().includes(labelName);
+  }
+
+  public getAllIssuesByStateAndLabels = injectQuery(() => ({
+    queryKey: ['allIssues',
+      {
+      state: this.stateSelected(),
+      labels: this.labelsSelected().sort().join(',')
+      } // comoo objeto para que sea unico por state y labels y no importe el orden de las labels y state
+    ],
+    queryFn: () => getGithubIssuesActionsByStateAndLables(this.stateSelected(), this.labelsSelected()),
+    enabled: !!this.stateSelected() || this.labelsSelected().length > 0,
+    staleTime: 1000 * 60 * 5 // 5 minutos, tiempo que dura en estar "fresco" el query
+  }));
   //   Solucion Usa field initializer o runInInjectionContext para mantener el contexto de inyección.
 
   // EUsa un factory o helper que reciba la señal y ejecute el query dentro de un contexto de inyección, por ejemplo usando runInInjectionContext:

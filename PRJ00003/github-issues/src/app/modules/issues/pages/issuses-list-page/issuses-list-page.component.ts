@@ -35,7 +35,8 @@ export default class IssusesListPageComponent implements OnInit {
 
   public getIssues(){
     //return this.issuesService.getAllIssues;
-    return this.issuesService.getAllIssuesByState;
+    //return this.issuesService.getAllIssuesByState;
+    return this.issuesService.getAllIssuesByStateAndLabels;
   }
 
   public getLabels(){
