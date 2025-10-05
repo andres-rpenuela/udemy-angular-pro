@@ -6,6 +6,10 @@
       [style.--label-bg]="'#' + label.color"
       [style.--label-text]="getTextColor(label.color)"
       style="border-color: var(--label-bg);"
+      [style.background]="isLabelSelected(label.name) ? 'var(--label-bg)' : ''"
+      [ngClass]="{'selected-label': isLabelSelected(label.name) }"
+      [style.color]="isLabelSelected(label.name) ? getTextColor(label.color) : 'var(--label-bg)'"
+      (click)="onClickLabel(label.name)"
     >
       {{ label.name }}
     </span>

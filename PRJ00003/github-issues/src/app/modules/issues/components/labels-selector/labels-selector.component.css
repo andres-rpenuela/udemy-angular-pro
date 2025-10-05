@@ -5,7 +5,14 @@
 } */
 
 /* afecto solo aquellos que empice por label-  **/
-[id^="label-"]:hover {
+/* [id^="label-"]:hover {
   background-color: var(--label-bg);
   color: var(--label-text);
+} */
+
+/* Modo claro */
+[id^="label-"]:hover {
+   background-color: black;
+  color: white;
 }
+

@@ -58,6 +58,7 @@ export default class IssuesPageComponent implements OnInit {
   //   return this.issuesService.getIssueByNumber(this.issueNumber);
   // }
   // solution: crear la query dentro del constructor o ngOnInit o en un campo inicializador
+  // o si se quiere incluir en el get, usar runInInjectionContext o que this.issuesService.getIssueByNumbe no se una funcion y this.issueNumber, sea una señal del servicio como hacemos con el 'state' para obtener los Issues
   public issue = this.issuesService.getIssueByNumber(this.issueNumber);
 
   public comments = this.issuesService.getIssueCommentsByNumber(this.issueNumber);

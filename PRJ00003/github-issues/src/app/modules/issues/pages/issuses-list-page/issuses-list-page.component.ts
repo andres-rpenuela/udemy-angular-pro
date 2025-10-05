@@ -1,18 +1,21 @@
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { Component, effect, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { NgTemplateOutlet, TitleCasePipe } from '@angular/common';
 import { LoaderComponent } from "@app/commons/loader/loader.component";
 import { IssuesService } from '@issues-services/issues.service';
 import { ModalErrorComponent } from "@app/commons/modal-error/modal-error.component";
 import { IssueItemComponent } from "../../components/issue-item/issue-item.component";
 import { LabelsSelectorComponent } from "../../components/labels-selector/labels-selector.component";
+import { State } from '../../interfaces/github-issue.interface';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-issuses-list-page',
-  imports: [NgTemplateOutlet, LoaderComponent, ModalErrorComponent, IssueItemComponent, LabelsSelectorComponent],
+  imports: [ TitleCasePipe, NgTemplateOutlet, LoaderComponent, ModalErrorComponent, IssueItemComponent, LabelsSelectorComponent, NgClass],
   templateUrl: './issuses-list-page.component.html',
   styleUrls: ['./issuses-list-page.component.css']
 })
 export default class IssusesListPageComponent implements OnInit {
+  public readonly states : State[] = [State.All, State.Open, State.Closed];
 
   private issuesService = inject(IssuesService);
   public mostrarModal = signal<boolean>(false);
@@ -24,13 +27,16 @@ export default class IssusesListPageComponent implements OnInit {
   }
 });
 
+
   constructor() { }
 
   ngOnInit() {
   }
 
   public getIssues(){
-    return this.issuesService.getAllIssues;
+    //return this.issuesService.getAllIssues;
+    //return this.issuesService.getAllIssuesByState;
+    return this.issuesService.getAllIssuesByStateAndLabels;
   }
 
   public getLabels(){
@@ -47,5 +53,21 @@ export default class IssusesListPageComponent implements OnInit {
   public cerrarModal() {
     console.log('Cerrando modal desde el componente padre');
     this.mostrarModal.set(false);
+  }
+
+  public setState(newState: string) {
+    // Convertir string a State
+    const state = {
+      'all': State.All,
+      'open': State.Open,
+      'closed': State.Closed
+    }[newState.toLowerCase()] ?? State.All;
+
+    this.issuesService.stateSelected.set(state);
+    console.log('Estado seleccionado:', this.issuesService.stateSelected());
+  }
+
+  public get stateSelected(): WritableSignal<State> {
+    return this.issuesService.stateSelected;
   }
 }

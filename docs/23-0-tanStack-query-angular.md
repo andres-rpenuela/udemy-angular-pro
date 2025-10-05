@@ -293,6 +293,16 @@ export class CreateIssueComponent {
 
 💡 **Tip:** TanStack Query separa claramente **fetching de datos (queries)** de **mutaciones (POST/PUT/DELETE)**, lo que te permite mantener tu estado sincronizado y optimista de manera sencilla.
 
+---
+Nota: Para indicar que no tenga en cuenta el orden en el que se define la los argumentos o parte de los mismo en la `key` de tanstack query, estos se pueden definri entre `{}`, ejemplo:
+```ts
+query = injectQuery(() => ({
+    queryKey: ['issues'{ state(), [ ...labels{} ] }],
+    queryFn: () => this.getIssuesByStateAndLables( state(), [...labels], http ),
+    enabled: !!this.stateSelected(), // se lanza cuando hay algun estado definido o cmabia
+    staleTime: 1000 * 60 * 5 // 5 minutos, tiempo que dura en estar "fresco" el query
+  }))
+```
 
 ---
 

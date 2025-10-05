@@ -25,3 +25,11 @@ export const convertBlackOrWhiteFromCodeHex = (codeHexadecimal: string): string 
   // Si es claro, usar negro, si es oscuro, usar blanco
   return yiq >= 128 ? 'black' : 'white';
 }
+
+// Helper para detectar modo oscuro desde el html o body
+const isDarkMode = (): boolean => {
+  console.log('Detectando modo oscuro...: '+document.documentElement.classList.contains('dark'));
+  // Verificar primero en html, luego en body como fallback
+  return document.documentElement.classList.contains('dark');
+  /* ||  document.body.classList.contains('dark'); */
+};
