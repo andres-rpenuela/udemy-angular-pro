@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "devarp-side-menu": {
+      "projectType": "library",
+      "root": "projects/devarp-side-menu",
+      "sourceRoot": "projects/devarp-side-menu/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/devarp-side-menu/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/devarp-side-menu/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/devarp-side-menu/tsconfig.spec.json"
+          }
+        }
+      }
+    }
+  }
+}
