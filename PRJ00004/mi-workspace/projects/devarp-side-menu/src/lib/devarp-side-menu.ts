@@ -3,8 +3,12 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'lib-devarp-side-menu',
   imports: [],
-  templateUrl: './devarp-side-menu.html',
-  styleUrls: ['./devarp-side-menu.css'],
+  template: `
+    <p>
+      devarp-side-menu works!
+    </p>
+  `,
+  styles: ``
 })
 export class DevarpSideMenu {
 

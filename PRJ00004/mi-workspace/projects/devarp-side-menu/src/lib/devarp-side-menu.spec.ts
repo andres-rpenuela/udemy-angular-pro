@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DevarpSideMenu } from './devarp-side-menu';
+import { provideZoneChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 
 describe('DevarpSideMenu', () => {
   let component: DevarpSideMenu;
@@ -8,7 +9,10 @@ describe('DevarpSideMenu', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DevarpSideMenu]
+      imports: [DevarpSideMenu],
+      providers: [
+        provideZonelessChangeDetection()
+      ]
     })
     .compileComponents();
 

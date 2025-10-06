@@ -13,6 +13,7 @@
 9. [Testing de librerías](#9-testing-de-librerías)
 10. [Versionado y publicación](#10-versionado-y-publicación)
 11. [Mejores prácticas](#11-mejores-prácticas)
+12. [ANEXO: Configuraciones de Build - Development vs Production](#anexo-configuraciones-de-build---development-vs-production)
 
 ---
 
@@ -369,6 +370,9 @@ ng build my-lib --watch
 
 # Build para producción
 ng build my-lib --configuration production
+
+# Build para desarrollo (con optimizaciones mínimas)
+ng build my-lib --configuration development
 ```
 
 ### Resultado del build
@@ -458,6 +462,8 @@ ng test my-lib --watch
 # Test con coverage
 ng test my-lib --code-coverage
 ```
+
+> Ejemplo: `px ng test devarp-side-menu` (_eso esto no varía, a la forma tradicional_)
 
 ## 10. Versionado y publicación
 
@@ -660,5 +666,224 @@ ng build
 # Lint
 ng lint my-lib
 ```
+
+---
+
+# ANEXO: Configuraciones de Build - Development vs Production
+
+## ¿Qué hace `ng build my-lib --configuration development`?
+
+El comando `ng build my-lib --configuration development` construye la librería con optimizaciones **mínimas**, diseñado para **desarrollo y debugging**.
+
+## Diferencias entre configuraciones
+
+| Característica | Development | Production | Sin configuración |
+|---------------|-------------|------------|-------------------|
+| **Minificación** | ❌ No | ✅ Sí | 🔶 Parcial |
+| **Tree-shaking** | ❌ Básico | ✅ Agresivo | 🔶 Parcial |
+| **Source Maps** | ✅ Completos | ❌ No | 🔶 Básicos |
+| **Optimización** | ❌ Mínima | ✅ Máxima | 🔶 Media |
+| **Tamaño Bundle** | 🔴 Grande | 🟢 Pequeño | 🟡 Medio |
+| **Tiempo Build** | 🟢 Rápido | 🔴 Lento | 🟡 Medio |
+| **Debugging** | ✅ Fácil | ❌ Difícil | 🔶 Limitado |
+
+## Comandos y sus usos
+
+### Para desarrollo y debugging
+
+```bash
+# Build rápido con source maps completos
+ng build my-lib --configuration development
+
+# Con watch para desarrollo continuo
+ng build my-lib --configuration development --watch
+```
+
+**¿Cuándo usar?**
+- ✅ **Desarrollo activo** de la librería
+- ✅ **Debugging** de problemas
+- ✅ **Testing local** con source maps
+- ✅ **Iteración rápida** (builds más rápidos)
+
+### Para producción
+
+```bash
+# Build optimizado para distribución
+ng build my-lib --configuration production
+```
+
+**¿Cuándo usar?**
+- ✅ **Publicación en npm**
+- ✅ **Distribución final**
+- ✅ **CI/CD pipelines**
+- ✅ **Releases oficiales**
+
+### Build estándar (por defecto)
+
+```bash
+# Build con configuración balanceada
+ng build my-lib
+```
+
+**¿Cuándo usar?**
+- ✅ **Testing general**
+- ✅ **Builds de integración**
+- ✅ **Validación antes de producción**
+
+## Configuración en angular.json
+
+```json
+{
+  "projects": {
+    "my-lib": {
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/my-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/my-lib/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/my-lib/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    }
+  }
+}
+```
+
+## Ejemplo práctico de flujo de trabajo
+
+### 1. Desarrollo activo
+
+```bash
+# Terminal 1: Build continuo para desarrollo
+ng build my-lib --configuration development --watch
+
+# Terminal 2: Servir aplicación que usa la librería
+ng serve demo-app
+```
+
+### 2. Testing de integración
+
+```bash
+# Build estándar para testing
+ng build my-lib
+
+# Ejecutar tests
+ng test demo-app
+```
+
+### 3. Preparar para producción
+
+```bash
+# Build optimizado
+ng build my-lib --configuration production
+
+# Verificar tamaño y estructura
+ls -la dist/my-lib/
+```
+
+## Análisis de bundle
+
+### Ver contenido del build development
+
+```bash
+ng build my-lib --configuration development
+
+# Verificar archivos generados
+find dist/my-lib -name "*.js" -exec ls -lh {} \;
+```
+
+### Comparar tamaños
+
+```bash
+# Development build
+ng build my-lib --configuration development
+du -sh dist/my-lib/
+
+# Production build  
+ng build my-lib --configuration production
+du -sh dist/my-lib/
+
+# Diferencia de tamaño típica: 30-50% menor en production
+```
+
+## Debugging con development build
+
+### Source maps disponibles
+
+```bash
+# Build development incluye source maps
+ng build my-lib --configuration development
+
+# Verificar source maps
+find dist/my-lib -name "*.map" -type f
+```
+
+### Usar en aplicación para debugging
+
+```typescript
+// Importar desde dist para debugging
+import { MyLibModule } from '../../../dist/my-lib';
+
+// En development, los source maps permiten:
+// - Breakpoints en código original
+// - Stack traces legibles
+// - Debugging paso a paso
+```
+
+## Scripts recomendados en package.json
+
+```json
+{
+  "scripts": {
+    "build:lib": "ng build my-lib",
+    "build:lib:dev": "ng build my-lib --configuration development",
+    "build:lib:prod": "ng build my-lib --configuration production",
+    "build:lib:watch": "ng build my-lib --configuration development --watch",
+    "debug:lib": "ng build my-lib --configuration development && ng serve demo-app",
+    "release:lib": "ng build my-lib --configuration production && npm publish dist/my-lib"
+  }
+}
+```
+
+> Nota: 
+> - Sin usar `npx npm run build:lib_dev`, si no direcamnte `ng` -> `>npx ng build devarp-side-menu --configuration development`. El comando debe lanzarse en el direcotrio del workpace.
+> - Si se lanza sin el flags de `--configuration development`, compiliza para el modo de producción.
+
+## Mejores prácticas
+
+### Durante desarrollo
+
+```bash
+# Usar development para iteración rápida
+npm run build:lib:dev
+
+# O con watch automático
+npm run build:lib:watch
+```
+
+### Antes de commits
+
+```bash
+# Verificar que funciona en producción
+npm run build:lib:prod
+```
+
+### Para releases
+
+```bash
+# Siempre usar production para publicación
+npm run release:lib
+```
+
+El build con `--configuration development` es **esencial para desarrollo eficiente** ya que prioriza velocidad de build y facilidad de debugging sobre optimización de tamaño.
 
 Este enfoque de monorepo con librerías permite crear arquitecturas escalables, reutilizar código eficientemente y mantener consistencia across múltiples aplicaciones.
