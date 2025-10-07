@@ -465,6 +465,8 @@ ng test my-lib --code-coverage
 
 > Ejemplo: `px ng test devarp-side-menu` (_eso esto no varía, a la forma tradicional_)
 
+> Nota: En Angular 20, es importatne indicar que se trabaja en la zone `provideZonelessChangeDetection`, o si no se debe realizar una configuración  extra.
+
 ## 10. Versionado y publicación
 
 ### package.json de la librería
@@ -887,3 +889,5 @@ npm run release:lib
 El build con `--configuration development` es **esencial para desarrollo eficiente** ya que prioriza velocidad de build y facilidad de debugging sobre optimización de tamaño.
 
 Este enfoque de monorepo con librerías permite crear arquitecturas escalables, reutilizar código eficientemente y mantener consistencia across múltiples aplicaciones.
+
+

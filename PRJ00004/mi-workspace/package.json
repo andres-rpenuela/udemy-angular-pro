@@ -6,7 +6,24 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "ng lint",
+
+    "devarp-side-menu:clean": "rm -rf dist/devarp-side-menu",
+    "devarp-side-menu:build": "ng build devarp-side-menu",
+    "devarp-side-menu:test": "ng test devarp-side-menu --no-watch --no-progress --browsers ChromeHeadlessNoSandbox",
+    "devarp-side-menu:lint": "ng lint devarp-side-menu --max-warnings=5",
+    "devarp-side-menu:verify": "npm run devarp-side-menu:lint && npm run devarp-side-menu:test && npm run devarp-side-menu:build",
+    "devarp-side-menu:publish": "npm run devarp-side-menu:verify && cd dist/devarp-side-menu && npm publish --access public",
+
+    "devarp-side-menu:version:patch": "cd projects/devarp-side-menu && npm version patch",
+    "devarp-side-menu:version:minor": "cd projects/devarp-side-menu && npm version minor",
+    "devarp-side-menu:version:major": "cd projects/devarp-side-menu && npm version major",
+
+    "devarp-side-menu:release:patch": "npm run devarp-side-menu:version:patch && npm run devarp-side-menu:publish",
+    "devarp-side-menu:release:minor": "npm run devarp-side-menu:version:minor && npm run devarp-side-menu:publish",
+    "devarp-side-menu:release:major": "npm run devarp-side-menu:version:major && npm run devarp-side-menu:publish"
+
   },
   "prettier": {
     "printWidth": 100,
@@ -36,6 +53,8 @@
     "@angular/cli": "^20.3.4",
     "@angular/compiler-cli": "^20.3.0",
     "@types/jasmine": "~5.1.0",
+    "angular-eslint": "20.3.0",
+    "eslint": "^9.35.0",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
@@ -43,6 +62,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^20.3.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "typescript-eslint": "8.40.0"
   }
 }
