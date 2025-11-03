@@ -140,14 +140,51 @@ export class AppComponent {}
 
 ```bash
 # Build the library
-ng build @devarp/side-menu
+ng build devarp/side-menu
 
 # Run tests
-ng test @devarp/side-menu
+ng test devarp/side-menu
 
 # Run linting
-ng lint @devarp/side-menu
+ng lint devarp/side-menu
 ```
+> Nota: Aunque se visto en el punto `31-2-creating-library-angular-lint.md`, recordamos:
+> El `lint o linting` es un proceso por el cual Angular analiza el código fuenta en busca de errores, bugs, problemas de estilo y malas practicas sin ejecutar código.
+> Esta herramienta, esta incluida en Angular meidnate **ESLint**
+> Aunque se puede instalar si nesta incluida:
+>
+> ```shell
+> # Lint de todo el proyecto
+> ng lint
+> 
+> # Lint de una librería específica (como en el caso)
+> ng lint devarp-side-menu
+> 
+> # Lint con auto-corrección
+> ng lint --fix
+> 
+> # Lint con máximo 0 warnings (calidad estricta)
+> ng lint devarp-side-menu --max-warnings=0
+> ```
+>
+> El **lint** en angular se puede configura mediante el archivo `.eslintrc.json`
+> Y además, se puede incluiar como `script` para ejecutar como comando previo a publicación:
+> 
+> ```json
+> //package.json
+> {
+>   "scripts": {
+>     // Script individual de lint
+>     "devarp-side-menu:lint": "ng lint devarp-side-menu --max-warnings=0",
+>     
+>     // Script que incluye lint antes del build
+>     "devarp-side-menu:verify": "npm run devarp-side-menu:lint && npm run devarp-side-menu:test && npm run devarp-side-menu:build",
+>     
+>     // Script de publicación que ejecuta verificación completa
+>     "devarp-side-menu:publish": "npm run devarp-side-menu:verify && cd dist/devarp-side-menu && npm publish --access public"
+>   }
+> }
+> ```
 
 ## License
 
