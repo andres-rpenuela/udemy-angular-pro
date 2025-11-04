@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DevarpSideMenu } from './devarp-side-menu';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 
 describe('DevarpSideMenu', () => {
   let component: DevarpSideMenu;
@@ -9,9 +10,23 @@ describe('DevarpSideMenu', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DevarpSideMenu],
+      imports: [DevarpSideMenu, ],
       providers: [
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
+        //Si tu componente necesita ActivatedRoute, configura el test con routing:
+        // OPT. 1
+        //RouterTestingModule // ← Agregar RouterTestingModule
+        // OPT. 2
+        /*{
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { params: {} },
+            queryParams: { subscribe: () => {} },
+            params: { subscribe: () => {} }
+          }
+        }*/
+        // OPT. 3
+        provideRouter([]) // ← Proveedor moderno de routing
       ]
     })
     .compileComponents();
