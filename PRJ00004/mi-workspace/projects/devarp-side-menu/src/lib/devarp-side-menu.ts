@@ -39,6 +39,7 @@ export class DevarpSideMenu {
   isAuthenticated = input<boolean>(false);
   userInfo = input<UserInfo | null>(null);
   groupItemsBySection = input<boolean>(true);
+
   onDebugMode = input<boolean>(false);
 
   // ✅ OUTPUTS
@@ -54,6 +55,7 @@ export class DevarpSideMenu {
   protected readonly isDarkMode = computed(() => this.isDarkModeSignal());
   protected readonly isMenuOpen = computed(() => this.isMenuOpenSignal());
   protected readonly expandedItems = computed(() => this.expandedItemsSignal());
+  protected readonly hasUserNotifications = computed(() => this.userInfo()?.hasNotifications || false);
 
   // ✅ COMPUTED PARA ITEMS FILTRADOS POR ROLES Y AUTENTICACIÓN
   protected readonly visibleMenuItems = computed(() => {
@@ -150,6 +152,42 @@ export class DevarpSideMenu {
 
     return `text-lg font-bold ${colorClass}`;
   });
+
+  // ✅ COMPUTED PARA VERIFICAR SI MOSTRAR PUNTO DE NOTIFICACIONES
+  protected readonly shouldShowNotificationBadge = computed(() => {
+    const hasNotifications = this.hasUserNotifications();
+    const hasNotificationRoute = this.visibleMenuItems().some(item =>
+      item.route === '/notifications' ||
+      item.label?.toLowerCase().includes('notification')
+    );
+    const userCanSeeNotifications = this.userHasPermissionForNotifications();
+
+    return hasNotifications && hasNotificationRoute && userCanSeeNotifications;
+  });
+
+  // ✅ MÉTODO PARA VERIFICAR PERMISOS DE NOTIFICACIONES
+  private userHasPermissionForNotifications(): boolean {
+    const notificationItem = this.navItems().find(item =>
+      item.route === '/notifications' ||
+      item.label?.toLowerCase().includes('notification')
+    );
+
+    if (!notificationItem) return false;
+
+    // Si el item requiere autenticación y el usuario no está autenticado
+    if (notificationItem.requiresAuth && !this.isAuthenticated()) {
+      return false;
+    }
+
+    // Si no hay roles definidos, permitir acceso
+    if (!notificationItem.allowedRoles || notificationItem.allowedRoles.length === 0) {
+      return true;
+    }
+
+    // Verificar si el usuario tiene al menos uno de los roles permitidos
+    const userRoles = this.userInfo()?.roles || [];
+    return notificationItem.allowedRoles.some(role => userRoles.includes(role));
+  }
 
   protected readonly themeClasses = computed(() => {
     const isDark = this.isDarkMode();
