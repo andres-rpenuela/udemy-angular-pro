@@ -34,6 +34,8 @@
   }
 }
 
+ /* Estado inicial - oculto */
+/*
 .sidebar-container {
   position: fixed;
   top: 16px;
@@ -48,14 +50,15 @@
   display: flex;
   flex-direction: column;
 
-  /* Estado inicial - oculto */
   transform: translateX(-100%);
   opacity: 0;
   transition: transform 300ms ease-in-out, opacity 300ms ease-in-out;
+} */
+.sidebar-container {
+  @apply fixed top-0 left-0 h-full w-80 shadow-xl transition-transform duration-300 ease-in-out z-50;
 }
-
 /* Estados de visibilidad */
-.sidebar-visible {
+/* .sidebar-visible {
   transform: translateX(0);
   opacity: 1;
 }
@@ -64,7 +67,16 @@
   transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
+} */
+
+.sidebar-hidden {
+  @apply -translate-x-full lg:translate-x-0;
 }
+
+.sidebar-visible {
+  @apply translate-x-0;
+}
+
 
 /* Desktop - siempre visible */
 @media (min-width: 1280px) {

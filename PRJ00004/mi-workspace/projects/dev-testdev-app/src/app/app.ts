@@ -1,7 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 // Importar el side-menu de la libreria, como es un mone repo, se puede importar directamente
-import { DevarpSideMenu, MenuAction, MenuItem, SECTION_MENU_TYPES, TextColorType } from 'devarp-side-menu';
+import { DevarpSideMenu, MenuAction, MenuItem, SECTION_MENU_TYPES, TextColorType, UserInfo } from 'devarp-side-menu';
 import { sidevarMenuItems } from './shared/menu-items.data';
 
 @Component({
@@ -18,10 +18,23 @@ export class App {
   });
   // App title signal
   protected readonly title = signal('dev-testdev-app');
+  protected readonly userInfo = signal<UserInfo | null>({
+      id: '123',
+      name: 'Juan Pérez',
+      email: 'juan.perez@example.com',
+      roles: ['admin', 'user'] // Ejemplo de roles
+    });
 
+    changeUser(newUser: UserInfo): void {
+    this.userInfo.set(newUser);
+  }
+
+  logout(): void {
+    this.userInfo.set(null);
+  }
   // State signals
   protected isDarkMode = signal(true);
-  protected isAuthenticated = signal<boolean>(false);
+  protected isAuthenticated = computed<boolean>(() => this.userInfo() !== null);
 
 
   // Botton flotante
@@ -88,5 +101,10 @@ export class App {
 
   handleMenuClose(): void {
     console.log('Menu closed');
+  }
+
+  handleMenuClick(menuItem: MenuItem): void {
+    console.log('Menu item clicked:', menuItem);
+    // Aquí puedes agregar lógica adicional si es necesario
   }
 }

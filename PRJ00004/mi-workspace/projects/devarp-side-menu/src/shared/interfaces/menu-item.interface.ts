@@ -14,6 +14,7 @@ export interface MenuItem {
   subItems?: MenuItem[]; // ✅ Array de sub-items
   isExpandable?: boolean; // ✅ Flag para items expandibles
   level?: number; // ✅ Nivel de anidación (0 = padre, 1 = hijo, etc.)
+  allowedRoles?: string[]; // ✅ Nuevo campo para roles permitidos
 }
 
 

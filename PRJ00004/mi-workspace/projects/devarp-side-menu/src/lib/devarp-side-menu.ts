@@ -8,14 +8,17 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MenuItemComponent } from '../components/menu-item/menu-item.component';
-import {  MenuItem } from '../shared/interfaces/menu-item.interface';
+import { MenuItem } from '../shared/interfaces/menu-item.interface';
 import { TextColorType } from '../public-api';
 import {
   getSectionDisplayName,
   getSectionPriority,
 } from '../shared/helpers/menu.helper';
 import { GroupedSection } from '../shared/interfaces/grouped-section.interface';
-import { SECTION_MENU_TYPES, SectionMenu } from '../shared/types/menu-section.type';
+import {
+  SECTION_MENU_TYPES,
+  SectionMenu,
+} from '../shared/types/menu-section.type';
 import { UserInfo } from '../shared/interfaces/user-info.interface';
 
 @Component({
@@ -35,6 +38,8 @@ export class DevarpSideMenu {
   initialDarkMode = input<boolean>(true);
   isAuthenticated = input<boolean>(false);
   userInfo = input<UserInfo | null>(null);
+  groupItemsBySection = input<boolean>(true);
+  onDebugMode = input<boolean>(false);
 
   // ✅ OUTPUTS
   onThemeChange = output<boolean>();
@@ -49,6 +54,70 @@ export class DevarpSideMenu {
   protected readonly isDarkMode = computed(() => this.isDarkModeSignal());
   protected readonly isMenuOpen = computed(() => this.isMenuOpenSignal());
   protected readonly expandedItems = computed(() => this.expandedItemsSignal());
+
+  // ✅ COMPUTED PARA ITEMS FILTRADOS POR ROLES Y AUTENTICACIÓN
+  protected readonly visibleMenuItems = computed(() => {
+    const items = this.navItems();
+    const user = this.userInfo();
+    const isAuth = this.isAuthenticated();
+
+    console.debug('🔍 Processing items:', items);
+    console.debug('👤 User info:', user);
+    console.debug('🔒 Is authenticated:', isAuth);
+
+    // 1. Filtrar por autenticación
+    const authFilteredItems = this.filterItemsByAuth(items, isAuth);
+
+    // 2. Filtrar por roles
+    const roleFilteredItems = this.filterItemsByRoles(authFilteredItems, user);
+
+    console.debug('🔒 Auth filtered items:', authFilteredItems);
+    console.debug('👤 Role filtered items:', roleFilteredItems);
+
+    return roleFilteredItems;
+  });
+
+  // ✅ COMPUTED PRINCIPAL - SOPORTA TANTO AGRUPADO COMO NO AGRUPADO
+  protected readonly groupedNavItems = computed(() => {
+    const filteredItems = this.visibleMenuItems();
+    const shouldGroup = this.groupItemsBySection();
+
+    console.debug('📊 Filtered items for grouping:', filteredItems);
+    console.debug('🔧 Should group by section:', shouldGroup);
+
+    if (!shouldGroup) {
+      // Si no se agrupa, devolver todo en una sección principal
+      const mainSection = {
+        name: '',
+        key: SECTION_MENU_TYPES.main,
+        items: filteredItems,
+        priority: 0,
+      } as GroupedSection;
+
+      console.debug('📦 Main section created:', mainSection);
+      return [mainSection];
+    }
+
+    // Agrupar por sección
+    const grouped = this.groupItemsBySectionMethod(filteredItems);
+
+    // Filtrar secciones vacías
+    const nonEmptySections = grouped.filter(
+      (section) => section.items.length > 0
+    );
+
+    console.debug('📂 Grouped sections:', nonEmptySections);
+    return nonEmptySections;
+  });
+
+  // ✅ COMPUTED PROPERTY PARA VERIFICAR SI HAY ITEMS VISIBLES
+  protected readonly hasVisibleItems = computed(() => {
+    const sections = this.groupedNavItems();
+    if (sections.length === 0) {
+      return false;
+    }
+    return sections.some((section) => section.items.length > 0);
+  });
 
   protected readonly titleClasses = computed(() => {
     const colorTitle = this.colorTitle();
@@ -99,26 +168,15 @@ export class DevarpSideMenu {
     };
   });
 
-  // ✅ COMPUTED PARA ITEMS FILTRADOS Y AGRUPADOS - USANDO TIPOS CORRECTOS
-  // ✅ ASEGURAR QUE EL COMPUTED FUNCIONE CORRECTAMENTE
-  protected readonly groupedNavItems = computed(() => {
-    const items = this.navItems();
-    const isAuth = this.isAuthenticated();
+  protected readonly sidebarClasses = computed(() => {
+    const isOpen = this.isMenuOpen();
+    const themeClass = this.isDarkMode()
+      ? 'bg-gradient-to-br from-gray-800 to-gray-900'
+      : 'bg-gradient-to-br from-white to-gray-50';
 
-    // Filtrar items por autenticación
-    const filteredItems = this.filterItemsByAuth(items, isAuth);
+    const visibilityClass = isOpen ? 'sidebar-visible' : 'sidebar-hidden';
 
-    // Agrupar por sección
-    const grouped = this.groupItemsBySection(filteredItems);
-
-    // ✅ Filtrar secciones vacías
-    const nonEmptySections = grouped.filter(section => section.items.length > 0);
-
-    console.debug('🔒 Auth state:', isAuth);
-    console.debug('📋 Filtered items:', filteredItems);
-    console.debug('📂 Grouped sections:', nonEmptySections);
-
-    return nonEmptySections;
+    return `sidebar-container ${themeClass} ${visibilityClass}`;
   });
 
   // ✅ EFFECT PARA SINCRONIZAR CON INPUT INICIAL
@@ -145,20 +203,6 @@ export class DevarpSideMenu {
     console.debug('🔴 DevarpSideMenu: Closing menu');
     this.isMenuOpenSignal.set(false);
     this.onSidebarStateChange.emit(false);
-
-    // ✅ Debug: Verificar que se apliquen las clases
-    setTimeout(() => {
-      const sidebar = document.querySelector('.sidebar-container');
-      console.debug('📱 Sidebar after close - classes:', sidebar?.className);
-      console.debug(
-        '📱 Sidebar after close - computed style:',
-        window.getComputedStyle(sidebar!).transform
-      );
-      console.debug(
-        '📱 Sidebar after close - opacity:',
-        window.getComputedStyle(sidebar!).opacity
-      );
-    }, 100);
   }
 
   public toggleMenu(): void {
@@ -168,7 +212,7 @@ export class DevarpSideMenu {
     this.onSidebarStateChange.emit(newState);
   }
 
-  // ✅ MÉTODO PARA MANEJAR EXPANSIÓN DE ITEMS - CORREGIDO
+  // ✅ MÉTODO PARA MANEJAR EXPANSIÓN DE ITEMS
   protected handleToggleExpansion(itemId: string): void {
     console.debug('🔧 DevarpSideMenu: Toggling expansion for item:', itemId);
     const currentExpanded = this.expandedItemsSignal();
@@ -193,80 +237,73 @@ export class DevarpSideMenu {
     }
   }
 
-  // ✅ HELPER PARA VERIFICAR SI UN ITEM ES HIJO DE OTRO
-  private isChildOf(parentId: string, childId: string): boolean {
-    const findInItems = (
-      items: MenuItem[],
-      targetParentId: string,
-      targetChildId: string
-    ): boolean => {
-      for (const item of items) {
-        if (item.id === targetParentId && item.subItems) {
-          // Buscar en hijos directos
-          if (item.subItems.some((child) => child.id === targetChildId)) {
-            return true;
-          }
-          // Buscar recursivamente en nietos
-          for (const child of item.subItems) {
-            if (
-              child.subItems &&
-              findInItems([child], child.id, targetChildId)
-            ) {
-              return true;
-            }
-          }
-        }
-      }
+  // ✅ MÉTODOS DE FILTRADO POR ROLES
+  private filterItemsByRoles(
+    items: MenuItem[],
+    user: UserInfo | null
+  ): MenuItem[] {
+    return items
+      .filter((item) => this.hasAccessToItem(item, user))
+      .map((item) => ({
+        ...item,
+        subItems: item.subItems
+          ? this.filterItemsByRoles(item.subItems, user)
+          : undefined,
+      }))
+      .filter(
+        (item) =>
+          // Mantener items que no tienen subItems o que tienen subItems después del filtrado
+          !item.subItems || item.subItems.length > 0
+      );
+  }
+
+  private hasAccessToItem(item: MenuItem, user: UserInfo | null): boolean {
+    // Si no hay roles definidos en el item, es accesible para todos
+    if (!item.allowedRoles || item.allowedRoles.length === 0) {
+      return true;
+    }
+
+    // Si no hay usuario, no tiene acceso
+    if (!user || !user.roles) {
       return false;
-    };
+    }
 
-    return findInItems(this.navItems(), parentId, childId);
+    // Verificar si el usuario tiene al menos uno de los roles permitidos
+    return item.allowedRoles.some((role) => user.roles.includes(role));
   }
 
-  // ✅ MÉTODO PARA AUTENTICACIÓN
-  protected showUserInfo(): boolean {
-    return this.isAuthenticated() && !!this.userInfo();
-  }
-
-  // ✅ MÉTODO CORREGIDO PARA FILTRAR POR AUTENTICACIÓN
+  // ✅ MÉTODOS DE FILTRADO POR AUTENTICACIÓN
   private filterItemsByAuth(items: MenuItem[], isAuth: boolean): MenuItem[] {
     return items
-      .filter(item => {
-        // ✅ LÓGICA ESPECÍFICA PARA AUTH:
-
+      .filter((item) => {
         // Si requiere autenticación pero NO está autenticado → OCULTAR
         if (item.requiresAuth === true && !isAuth) {
           return false;
         }
 
         // Si NO requiere autenticación pero SÍ está autenticado → OCULTAR
-        // (Esto típicamente es para login/register)
         if (item.requiresAuth === false && isAuth) {
           return false;
         }
 
-        // ✅ CASOS QUE SE MUESTRAN:
-        // - requiresAuth: true y isAuth: true → MOSTRAR (dashboard, logout, etc.)
-        // - requiresAuth: false y isAuth: false → MOSTRAR (login, register)
-        // - requiresAuth: undefined → MOSTRAR (siempre visible como help, about)
         return true;
       })
-      .map(item => ({
+      .map((item) => ({
         ...item,
-        subItems: item.subItems ? this.filterItemsByAuth(item.subItems, isAuth) : undefined
+        subItems: item.subItems
+          ? this.filterItemsByAuth(item.subItems, isAuth)
+          : undefined,
       }))
-      .filter(item =>
-        // Mantener el item si no tiene subItems o si tiene subItems después del filtrado
-        !item.subItems || item.subItems.length > 0
-      );
+      .filter((item) => !item.subItems || item.subItems.length > 0);
   }
 
-  // ✅ MÉTODO CORREGIDO USANDO TU ESTRUCTURA
-  private groupItemsBySection(items: MenuItem[]): GroupedSection[] {
+  // ✅ MÉTODO PARA AGRUPAR POR SECCIÓN (CORREGIDO EL NOMBRE DEL MÉTODO)
+  private groupItemsBySectionMethod(items: MenuItem[]): GroupedSection[] {
     const sections = new Map<SectionMenu, MenuItem[]>();
 
     items.forEach((item) => {
-      const sectionKey = item.section || SECTION_MENU_TYPES.main;
+      const sectionKey =
+        (item.section as SectionMenu) || SECTION_MENU_TYPES.main;
       if (!sections.has(sectionKey)) {
         sections.set(sectionKey, []);
       }
@@ -283,17 +320,64 @@ export class DevarpSideMenu {
       .sort((a, b) => a.priority - b.priority);
   }
 
-  protected readonly sidebarClasses = computed(() => {
-    const isOpen = this.isMenuOpen();
-    const themeClass = this.isDarkMode()
-      ? 'bg-gradient-to-br from-gray-800 to-gray-900'
-      : 'bg-gradient-to-br from-white to-gray-50';
+  // ✅ MÉTODOS AUXILIARES
+  private isChildOf(parentId: string, childId: string): boolean {
+    const findInItems = (
+      items: MenuItem[],
+      targetParentId: string,
+      targetChildId: string
+    ): boolean => {
+      for (const item of items) {
+        if (item.id === targetParentId && item.subItems) {
+          if (item.subItems.some((child) => child.id === targetChildId)) {
+            return true;
+          }
+          for (const child of item.subItems) {
+            if (
+              child.subItems &&
+              findInItems([child], child.id, targetChildId)
+            ) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    };
 
-    const visibilityClass = isOpen ? 'sidebar-visible' : 'sidebar-hidden';
+    return findInItems(this.navItems(), parentId, childId);
+  }
 
-    return `sidebar-container ${themeClass} ${visibilityClass}`;
+  protected showUserInfo(): boolean {
+    const isAuth = this.isAuthenticated();
+    const user = this.userInfo();
+
+    console.debug('🔍 showUserInfo check:', {
+      isAuthenticated: isAuth,
+      userInfo: user,
+      result: isAuth && !!user,
+    });
+
+    return isAuth && !!user;
+  }
+  protected readonly debugInfo = computed(() => {
+    return {
+      isAuthenticated: this.isAuthenticated(),
+      userInfo: this.userInfo(),
+      showUserInfo: this.showUserInfo(),
+      menuItems: this.navItems().length,
+      visibleItems: this.visibleMenuItems().length,
+      sections: this.groupedNavItems().length,
+      isMenuOpen: this.isMenuOpen(),
+    };
   });
 
+  protected getVisibleSubItems(subItems: MenuItem[]): MenuItem[] {
+    const user = this.userInfo();
+    return this.filterItemsByRoles(subItems, user);
+  }
+
+  // ✅ MÉTODOS PARA CREAR ITEMS CON NIVELES
   protected createMainItem(
     item: MenuItem
   ): MenuItem & { level?: number; isExpandable?: boolean } {
@@ -304,7 +388,6 @@ export class DevarpSideMenu {
     };
   }
 
-  // Los otros métodos ya están definidos:
   protected createChildItem(
     item: MenuItem
   ): MenuItem & { level: number; isExpandable?: boolean } {
@@ -323,5 +406,35 @@ export class DevarpSideMenu {
       level: 2,
       isExpandable: !!(item.subItems && item.subItems.length > 0),
     };
+  }
+
+  // ✅ MÉTODOS PARA CLASES DE ESTILOS DE SECCIÓN
+  protected getSectionTitleClasses(): string {
+    const isDark = this.isDarkMode();
+    return `px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
+      isDark ? 'text-gray-400' : 'text-gray-500'
+    }`;
+  }
+
+  protected getSectionSeparatorClasses(): string {
+    const isDark = this.isDarkMode();
+    return `my-2 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`;
+  }
+
+  // ✅ MÉTODO PARA DEBUG DE ROLES
+  protected debugMenuState(): void {
+    const items = this.navItems();
+    const user = this.userInfo();
+    const isAuth = this.isAuthenticated();
+    const shouldGroup = this.groupItemsBySection();
+
+    console.group('🐛 DevarpSideMenu Debug');
+    console.log('Original items:', items);
+    console.log('User info:', user);
+    console.log('Is authenticated:', isAuth);
+    console.log('Group by section:', shouldGroup);
+    console.log('Visible items:', this.visibleMenuItems());
+    console.log('Grouped items:', this.groupedNavItems());
+    console.groupEnd();
   }
 }

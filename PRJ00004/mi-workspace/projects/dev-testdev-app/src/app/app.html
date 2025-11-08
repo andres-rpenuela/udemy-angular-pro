@@ -1,44 +1,254 @@
-<h1 class="text-3xl font-bold underline"> Hola mundo! </h1>
-<p>Bienvenido a nuestra aplicación de prueba de desarrollo.</p>
+<!-- ✅ LAYOUT PRINCIPAL CON SIDEBAR FLOTANTE -->
+<div class="min-h-screen transition-colors duration-300"
+     [class]="isDarkMode() ? 'bg-gray-900' : 'bg-gray-50'">
 
-<!-- ✅ QUITAR EL BOTÓN EXTERNO - El sidebar maneja su propio botón -->
-<devarp-side-menu
-  [titleText]="'DevArp'"
-  [colorTitle]="titleColor()"
-  [subtitleText]="'Corporation'"
-  [navItems]="menuItems()"
-  [useButtonFloatingChildComponent]="true"
-  [initialDarkMode]="isDarkMode()"
-  [isAuthenticated]="true"
-  (onThemeChange)="onThemeChange($event)"
-  (onSidebarStateChange)="onSidebarStateChange($event)">
-</devarp-side-menu>
+  <!-- ✅ SIDEBAR FLOTANTE CON ROLES Y SECCIONES -->
+  <devarp-side-menu
+    [titleText]="'DevArp'"
+    [colorTitle]="titleColor()"
+    [subtitleText]="'Corporation'"
+    [navItems]="menuItems()"
+    [userInfo]="userInfo()"
+    [useButtonFloatingChildComponent]="true"
+    [initialDarkMode]="isDarkMode()"
+    [isAuthenticated]="isAuthenticated()"
+    [onDebugMode]="true"
+    (onThemeChange)="onThemeChange($event)"
+    (onSidebarStateChange)="onSidebarStateChange($event)">
+  </devarp-side-menu>
 
-<!-- ✅ CONTENIDO PRINCIPAL SIN MARGEN FIJO - Ocupa toda la pantalla -->
-<main class="p-4 transition-all duration-300">
-  <div class="max-w-7xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Contenido principal</h1>
-    <p class="mb-4">El menú flotante se controla con el botón en la esquina inferior derecha</p>
+  <!-- ✅ CONTENIDO PRINCIPAL - CON MARGEN IZQUIERDO EN PANTALLAS GRANDES -->
+  <div class="transition-all duration-300 lg:ml-80">
 
-    <!-- Contenido de ejemplo -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h3 class="text-lg font-semibold mb-2">Card 1</h3>
-        <p class="text-gray-600 dark:text-gray-300">Contenido de ejemplo</p>
+    <!-- ✅ NAVBAR SUPERIOR -->
+    <nav class="shadow-sm border-b sticky top-0 z-30 transition-colors duration-300"
+         [class]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+
+          <!-- Logo/Brand para móvil cuando el sidebar está cerrado -->
+          <div class="flex items-center lg:hidden">
+            <h1 class="text-xl font-bold transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+              {{ title() || 'DevArp' }}
+            </h1>
+          </div>
+
+          <!-- Controles del navbar -->
+          <div class="flex items-center space-x-4 ml-auto">
+
+            <!-- Debug info del tema -->
+            <div class="hidden sm:flex items-center px-3 py-1 text-xs rounded-full transition-colors duration-300"
+                 [class]="isDarkMode() ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'">
+              {{ isDarkMode() ? 'Dark' : 'Light' }} Mode
+            </div>
+
+            <!-- Información del usuario (visible en pantallas grandes) -->
+            @if (userInfo() && isAuthenticated()) {
+              <div class="hidden md:flex items-center space-x-3">
+                <div class="text-right">
+                  <p class="text-sm font-medium transition-colors duration-300"
+                     [class]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+                    {{ userInfo()?.name }}
+                  </p>
+                  <p class="text-xs transition-colors duration-300"
+                     [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+                    {{ userInfo()?.roles?.join(', ') }}
+                  </p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                  <span class="text-white font-medium text-sm">
+                    {{ userInfo()?.name?.charAt(0)?.toUpperCase() }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
       </div>
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h3 class="text-lg font-semibold mb-2">Card 2</h3>
-        <p class="text-gray-600 dark:text-gray-300">Contenido de ejemplo</p>
-      </div>
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h3 class="text-lg font-semibold mb-2">Card 3</h3>
-        <p class="text-gray-600 dark:text-gray-300">Contenido de ejemplo</p>
-      </div>
-    </div>
+    </nav>
 
-    <!-- Debug info -->
-    <div class="fixed top-4 right-4 bg-red-500 text-white p-2 text-xs z-30 rounded">
-      Theme: {{ isDarkMode() ? 'Dark' : 'Light' }}
-    </div>
+    <!-- ✅ CONTENIDO PRINCIPAL -->
+    <main class="flex-1 p-4 lg:p-6">
+      <div class="max-w-7xl mx-auto">
+
+        <!-- ✅ HEADER DE BIENVENIDA -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold mb-2 transition-colors duration-300"
+              [class]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+            ¡Hola mundo!
+          </h1>
+          <p class="transition-colors duration-300"
+             [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-600'">
+            Bienvenido a nuestra aplicación de prueba de desarrollo.
+          </p>
+        </div>
+
+        <!-- ✅ SECCIÓN DE TESTING DE ROLES -->
+        <div class="rounded-lg shadow-sm border p-6 mb-8 transition-colors duration-300"
+             [class]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
+          <h3 class="text-lg font-semibold mb-4 transition-colors duration-300"
+              [class]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+            Control de Usuario y Roles
+          </h3>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Info del usuario actual -->
+            <div>
+              <h4 class="text-sm font-medium mb-2 transition-colors duration-300"
+                  [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-700'">
+                Usuario Actual
+              </h4>
+              <div class="rounded-md p-3 transition-colors duration-300"
+                   [class]="isDarkMode() ? 'bg-gray-700' : 'bg-gray-50'">
+                <p class="text-sm font-medium transition-colors duration-300"
+                   [class]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+                  {{ userInfo()?.name || 'No logueado' }}
+                </p>
+                @if (userInfo()?.email) {
+                  <p class="text-xs transition-colors duration-300"
+                     [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+                    {{ userInfo()!.email }}
+                  </p>
+                }
+                <p class="text-xs mt-1 transition-colors duration-300"
+                   [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-600'">
+                  Roles: {{ userInfo()?.roles?.join(', ') || 'Sin roles' }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Botones de testing -->
+            <div>
+              <h4 class="text-sm font-medium mb-2 transition-colors duration-300"
+                  [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-700'">
+                Probar Diferentes Usuarios
+              </h4>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md transition-colors"
+                  (click)="changeUser({id: '1', name: 'Admin User', email: 'admin.user@example.com', roles: ['admin', 'user']})">
+                  Admin
+                </button>
+                <button
+                  class="px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md transition-colors"
+                  (click)="changeUser({id: '2', name: 'Manager User', email: 'manager.user@example.com', roles: ['manager', 'user']})">
+                  Manager
+                </button>
+                <button
+                  class="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm rounded-md transition-colors"
+                  (click)="changeUser({id: '3', name: 'Regular User', email: 'regular.user@example.com', roles: ['user']})">
+                  Usuario
+                </button>
+                <button
+                  class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition-colors"
+                  (click)="logout()">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ CONTENIDO DE EJEMPLO - CARDS RESPONSIVAS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div class="rounded-lg shadow-sm border p-6 transition-colors duration-300"
+               [class]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-300"
+                   [class]="isDarkMode() ? 'bg-blue-900' : 'bg-blue-100'">
+                <svg class="w-6 h-6 transition-colors duration-300"
+                     [class]="isDarkMode() ? 'text-blue-400' : 'text-blue-600'"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+            </div>
+            <h3 class="text-lg font-semibold mb-2 transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-white' : 'text-gray-900'">Dashboard</h3>
+            <p class="text-sm transition-colors duration-300"
+               [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-600'">
+              Panel principal con métricas y estadísticas del sistema.
+            </p>
+          </div>
+
+          <div class="rounded-lg shadow-sm border p-6 transition-colors duration-300"
+               [class]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-300"
+                   [class]="isDarkMode() ? 'bg-green-900' : 'bg-green-100'">
+                <svg class="w-6 h-6 transition-colors duration-300"
+                     [class]="isDarkMode() ? 'text-green-400' : 'text-green-600'"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                </svg>
+              </div>
+            </div>
+            <h3 class="text-lg font-semibold mb-2 transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-white' : 'text-gray-900'">Usuarios</h3>
+            <p class="text-sm transition-colors duration-300"
+               [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-600'">
+              Gestión de usuarios, roles y permisos del sistema.
+            </p>
+          </div>
+
+          <div class="rounded-lg shadow-sm border p-6 transition-colors duration-300"
+               [class]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-300"
+                   [class]="isDarkMode() ? 'bg-purple-900' : 'bg-purple-100'">
+                <svg class="w-6 h-6 transition-colors duration-300"
+                     [class]="isDarkMode() ? 'text-purple-400' : 'text-purple-600'"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+            </div>
+            <h3 class="text-lg font-semibold mb-2 transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-white' : 'text-gray-900'">Reportes</h3>
+            <p class="text-sm transition-colors duration-300"
+               [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-600'">
+              Análisis de datos y reportes detallados del sistema.
+            </p>
+          </div>
+        </div>
+
+        <!-- ✅ ROUTER OUTLET PARA RUTAS -->
+        <div class="rounded-lg shadow-sm border min-h-96 transition-colors duration-300"
+             [class]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
+          <div class="p-6">
+            <div class="transition-colors duration-300"
+                 [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-600'">
+              ROUTER OUTLET PLACEHOLDER
+              <!-- <router-outlet /> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ✅ FOOTER -->
+    <footer class="border-t mt-12 transition-colors duration-300"
+            [class]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div class="text-sm transition-colors duration-300"
+               [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+            © 2025 DevArp Corporation. Todos los derechos reservados.
+          </div>
+          <div class="flex items-center space-x-4">
+            <span class="text-xs transition-colors duration-300"
+                  [class]="isDarkMode() ? 'text-gray-500' : 'text-gray-400'">
+              Versión 1.0.0
+            </span>
+            <div class="flex items-center space-x-2">
+              <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span class="text-xs transition-colors duration-300"
+                    [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">Sistema activo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
-</main>
+</div>
