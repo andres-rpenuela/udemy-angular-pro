@@ -480,13 +480,17 @@
                 Cambiar Usuario
               </h4>
               <div class="grid grid-cols-2 gap-2">
-                @for (testUser of testUsers; track testUser.id) {
-                <button
-                  class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md transition-colors"
-                  (click)="changeUser(testUser)"
-                >
-                  {{ testUser.name.split(' (')[0] }}
-                </button>
+                @for (testUser of testUsers(); track testUser.id) {
+                  <button
+                    class="px-3 py-2 text-white text-sm rounded-md transition-colors flex items-center space-x-2"
+                    [class]="getUserButtonClass(testUser?.roles?.[0] || 'user')"
+                    (click)="changeUser(testUser)">
+                    <!-- Avatar con iniciales -->
+                    <div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
+                      <span class="text-xs font-medium">{{ testUser.avatar || testUser.name.charAt(0) }}</span>
+                    </div>
+                    <span class="truncate">{{ testUser.name.split(' (')[0] }}</span>
+                  </button>
                 }
                 <button
                   class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md transition-colors"
@@ -499,13 +503,31 @@
 
             <!-- Crear notificaciones -->
             <div>
-              <h4
-                class="text-sm font-medium mb-2 transition-colors duration-300"
-                [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-700'"
-              >
-                Crear Notificaciones
-              </h4>
-              <div class="grid grid-cols-1 gap-2">
+              <h5 class="text-xs font-medium mb-2 transition-colors duration-300"
+                  [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-600'">
+                Testing Avanzado de Usuarios
+              </h5>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  class="px-2 py-1 bg-cyan-500 hover:bg-cyan-600 text-white text-xs rounded-md transition-colors"
+                  (click)="testSendTaskToRandomUser()">
+                  Tarea Aleatoria
+                </button>
+                <button
+                  class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs rounded-md transition-colors"
+                  (click)="testSendAnnouncementToDevelopers()">
+                  Anuncio Devs
+                </button>
+                <button
+                  class="px-2 py-1 bg-violet-500 hover:bg-violet-600 text-white text-xs rounded-md transition-colors"
+                  (click)="testShowAllUsersStats()">
+                  Stats Usuarios
+                </button>
+                <button
+                  class="px-2 py-1 bg-rose-500 hover:bg-rose-600 text-white text-xs rounded-md transition-colors"
+                  (click)="simulateMultipleUsersReading()">
+                  Multi-Lectura
+                </button>
                 <button
                   class="px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md transition-colors"
                   (click)="testSendTaskToCurrentUser()"

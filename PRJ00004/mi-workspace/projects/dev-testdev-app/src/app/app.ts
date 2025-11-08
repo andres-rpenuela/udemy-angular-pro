@@ -1,15 +1,12 @@
 import { Component, computed, signal, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
-import { DevarpSideMenu, MenuAction, MenuItem, SECTION_MENU_TYPES, TextColorType, UserInfo as BaseUserInfo } from 'devarp-side-menu';
+import { DevarpSideMenu, MenuAction, MenuItem, SECTION_MENU_TYPES, TextColorType, UserInfo as BaseUserInfo, ExtendedUserInfo } from 'devarp-side-menu';
 import { sidevarMenuItems } from './shared/menu-items.data';
 import { notificationsData, Notification } from './shared/notifications.data';
 import { NotificationService } from './shared/notification.service';
+import { systemUsers, UserUtils } from './shared/system-users.data';
 
-// ✅ INTERFAZ EXTENDIDA CON DEPARTAMENTO
-export interface ExtendedUserInfo extends BaseUserInfo {
-  department?: string;
-}
 
 @Component({
   selector: 'app-root',
@@ -34,19 +31,11 @@ export class App implements OnInit {
   });
 
   // ✅ ===========================================
-  // ✅ GESTIÓN DE USUARIOS Y AUTENTICACIÓN
+  // ✅ GESTIÓN DE USUARIOS UNIFICADA
   // ✅ ===========================================
 
-  // ✅ Signal base del usuario (sin hasNotifications calculado automáticamente)
-  private baseUserInfo = signal<ExtendedUserInfo | null>({
-    id: '123',
-    name: 'Juan Pérez',
-    email: 'juan.perez@example.com',
-    roles: ['admin', 'user'],
-    hasNotifications: false, // Valor inicial, se calculará dinámicamente
-    department: 'desarrollo'
-  });
-
+  // ✅ Signal base del usuario usando el primer usuario del sistema
+  private baseUserInfo = signal<ExtendedUserInfo | null>(systemUsers[0]); // Juan Pérez por defecto
 
   // ✅ COMPUTED: Usuario con hasNotifications calculado dinámicamente
   protected readonly userInfo = computed<ExtendedUserInfo | null>(() => {
@@ -70,8 +59,11 @@ export class App implements OnInit {
 
   protected readonly isAuthenticated = computed<boolean>(() => this.userInfo() !== null);
 
+  // ✅ USUARIOS CENTRALIZADOS PARA TESTING
+  protected readonly testUsers = computed(() => UserUtils.getUsersForTesting());
+
   // ✅ ===========================================
-  // ✅ SISTEMA DE NOTIFICACIONES CON SERVICIO
+  // ✅ SISTEMA DE NOTIFICACIONES (sin cambios)
   // ✅ ===========================================
 
   private showNotificationsPanelSignal = signal(false);
@@ -79,7 +71,7 @@ export class App implements OnInit {
 
   // ✅ COMPUTED: Notificaciones específicas para el usuario actual
   protected readonly userNotifications = computed(() => {
-    const user = this.baseUserInfo(); // Usar baseUserInfo para evitar ciclo infinito
+    const user = this.baseUserInfo();
     if (!user) return [];
 
     return this.notificationService.getNotificationsForUser(
@@ -127,7 +119,7 @@ export class App implements OnInit {
     return this.userNotifications().filter(n => !n.isRead).length;
   });
 
-  // ✅ MÉTODOS PARA MANEJO DE NOTIFICACIONES
+  // ✅ MÉTODOS PARA MANEJO DE NOTIFICACIONES (sin cambios)
 
   toggleNotificationsPanel(): void {
     this.showNotificationsPanelSignal.update(value => !value);
@@ -159,25 +151,30 @@ export class App implements OnInit {
     console.log('Navegando a todas las notificaciones');
   }
 
-  // ✅ MÉTODOS PARA CREAR NOTIFICACIONES ESPECÍFICAS
+  // ✅ MÉTODOS PARA CREAR NOTIFICACIONES MEJORADOS
 
   sendTaskToUser(targetUserId: string, taskTitle: string): void {
     const currentUser = this.baseUserInfo();
     if (!currentUser) return;
 
+    const targetUser = UserUtils.getUserById(targetUserId);
+    const targetName = targetUser ? targetUser.name : 'Usuario';
+
     this.notificationService.createTaskNotification(
       targetUserId,
       `Nueva tarea: ${taskTitle}`,
-      `${currentUser.name} te ha asignado una nueva tarea: ${taskTitle}`,
+      `${currentUser.name} te ha asignado: ${taskTitle}`,
       currentUser.id
     );
 
-    console.log(`Tarea enviada al usuario ${targetUserId}`);
+    console.log(`Tarea "${taskTitle}" enviada a ${targetName} (${targetUserId})`);
   }
 
   sendAnnouncementToRole(role: string, title: string, message: string): void {
     const currentUser = this.baseUserInfo();
     if (!currentUser) return;
+
+    const usersWithRole = UserUtils.getUsersByRole(role);
 
     this.notificationService.createRoleNotification(
       [role],
@@ -186,34 +183,45 @@ export class App implements OnInit {
       currentUser.id
     );
 
-    console.log(`Anuncio enviado a rol ${role}`);
+    console.log(`Anuncio "${title}" enviado a rol ${role} (${usersWithRole.length} usuarios)`);
   }
 
   sendGlobalAnnouncement(title: string, message: string): void {
     this.notificationService.createGlobalNotification(title, message);
-    console.log('Anuncio global enviado');
+    console.log(`Anuncio global "${title}" enviado a todos los usuarios`);
   }
 
   // ✅ ===========================================
-  // ✅ GESTIÓN DE USUARIOS (TESTING MEJORADO)
+  // ✅ GESTIÓN DE USUARIOS UNIFICADA
   // ✅ ===========================================
 
   changeUser(newUser: ExtendedUserInfo): void {
-    console.log('Changing user to:', newUser);
-    // ✅ Actualizar el usuario base (sin hasNotifications)
-    const userWithoutNotifications = {
-      ...newUser,
-      // No incluir hasNotifications aquí, se calculará automáticamente
-    };
-    delete (userWithoutNotifications as any).hasNotifications;
+    console.log('Cambiando a usuario:', newUser.name);
 
-    this.baseUserInfo.set(userWithoutNotifications);
-    console.log('Notificaciones para nuevo usuario:', this.userNotifications().length);
-    console.log('Tiene notificaciones no leídas:', this.hasNotifications());
+    // Buscar el usuario real en el sistema
+    const systemUser = UserUtils.getUserById(newUser.id);
+    if (systemUser) {
+      const userWithoutNotifications = { ...systemUser };
+      delete (userWithoutNotifications as any).hasNotifications;
+
+      this.baseUserInfo.set(userWithoutNotifications);
+
+      // Debug mejorado
+      setTimeout(() => {
+        console.log(`=== CAMBIO A ${systemUser.name.toUpperCase()} ===`);
+        console.log('ID:', systemUser.id);
+        console.log('Roles:', systemUser.roles?.join(', '));
+        console.log('Departamento:', systemUser.department);
+        console.log('Notificaciones visibles:', this.userNotifications().length);
+        console.log('Notificaciones no leídas:', this.unreadNotificationsCount());
+        console.log('hasNotifications:', this.userInfo()?.hasNotifications);
+        console.log('=====================================');
+      }, 100);
+    }
   }
 
   logout(): void {
-    console.log('User logged out');
+    console.log('Usuario desconectado');
     this.baseUserInfo.set(null);
     this.showNotificationsPanelSignal.set(false);
   }
@@ -222,59 +230,38 @@ export class App implements OnInit {
     console.log('Abrir modal de login');
   }
 
-  // ✅ USUARIOS DE TESTING CON hasNotifications
-  testUsers: ExtendedUserInfo[] = [
-    {
-      id: '123',
-      name: 'Juan Pérez (Admin)',
-      email: 'juan.perez@example.com',
-      hasNotifications: false, // ✅ Campo requerido - se sobreescribirá dinámicamente
-      roles: ['admin', 'user'],
-      department: 'desarrollo'
-    },
-    {
-      id: '456',
-      name: 'María García (Manager)',
-      email: 'maria.garcia@example.com',
-      hasNotifications: false, // ✅ Campo requerido - se sobreescribirá dinámicamente
-      roles: ['manager', 'user'],
-      department: 'administracion'
-    },
-    {
-      id: '789',
-      name: 'Carlos López (Developer)',
-      email: 'carlos.lopez@example.com',
-      hasNotifications: false, // ✅ Campo requerido - se sobreescribirá dinámicamente
-      roles: ['developer', 'user'],
-      department: 'desarrollo'
-    },
-    {
-      id: '101',
-      name: 'Ana Rodríguez (HR)',
-      email: 'ana.rodriguez@example.com',
-      hasNotifications: false, // ✅ Campo requerido - se sobreescribirá dinámicamente
-      roles: ['hr', 'user'],
-      department: 'recursos-humanos'
-    }
-  ];
+  // ✅ MÉTODOS DE TESTING MEJORADOS
 
-  // ✅ MÉTODOS DE TESTING
   testSendTaskToCurrentUser(): void {
     const currentUser = this.baseUserInfo();
     if (!currentUser) return;
 
-    this.sendTaskToUser(currentUser.id, 'Revisar documentación técnica');
+    this.sendTaskToUser(currentUser.id, 'Revisar documentación técnica actualizada');
+  }
+
+  testSendTaskToRandomUser(): void {
+    const currentUser = this.baseUserInfo();
+    if (!currentUser) return;
+
+    const otherUsers = systemUsers.filter(u => u.id !== currentUser.id);
+    const randomUser = otherUsers[Math.floor(Math.random() * otherUsers.length)];
+
+    this.sendTaskToUser(randomUser.id, `Tarea asignada por ${currentUser.name}`);
   }
 
   testSendAnnouncementToAdmins(): void {
     this.sendAnnouncementToRole('admin', 'Reunión de administradores', 'Reunión urgente mañana a las 10:00 AM');
   }
 
-  testSendGlobalAnnouncement(): void {
-    this.sendGlobalAnnouncement('Mantenimiento programado', 'El sistema estará en mantenimiento esta noche');
+  testSendAnnouncementToDevelopers(): void {
+    this.sendAnnouncementToRole('developer', 'Sprint Planning', 'Reunión de planificación del próximo sprint');
   }
 
-  // ✅ MÉTODOS ADICIONALES PARA TESTING DE NOTIFICACIONES
+  testSendGlobalAnnouncement(): void {
+    this.sendGlobalAnnouncement('Actualización de políticas', 'Se han actualizado las políticas de seguridad de la empresa');
+  }
+
+  // ✅ MÉTODOS DE TESTING AVANZADOS (actualizados)
 
   addNotificationToCurrentUser(): void {
     const currentUser = this.baseUserInfo();
@@ -282,12 +269,12 @@ export class App implements OnInit {
 
     this.notificationService.createTaskNotification(
       currentUser.id,
-      'Tarea de prueba',
-      'Esta es una notificación de prueba para verificar que hasNotifications se actualiza',
+      'Tarea de prueba automática',
+      `Notificación de prueba generada para ${currentUser.name}`,
       'system'
     );
 
-    console.log('Notificación agregada. hasNotifications ahora es:', this.userInfo()?.hasNotifications);
+    console.log(`Notificación de prueba agregada para ${currentUser.name}`);
   }
 
   clearAllNotificationsForCurrentUser(): void {
@@ -295,13 +282,85 @@ export class App implements OnInit {
     if (!currentUser) return;
 
     this.markAllAsRead();
-
-    console.log('Todas las notificaciones marcadas como leídas. hasNotifications ahora es:', this.userInfo()?.hasNotifications);
+    console.log(`Todas las notificaciones marcadas como leídas para ${currentUser.name}`);
   }
 
-  // ✅ ===========================================
-  // ✅ RESTO DEL CÓDIGO (SIDEBAR, TEMA, ETC.)
-  // ✅ ===========================================
+  // ✅ MÉTODOS DE TESTING ESPECÍFICOS PARA USUARIOS UNIFICADOS
+
+  testSwitchToUser(userId: string): void {
+    const user = UserUtils.getUserById(userId);
+    if (user) {
+      this.changeUser(user);
+    }
+  }
+
+  testShowAllUsersStats(): void {
+    console.log('=== ESTADÍSTICAS DE TODOS LOS USUARIOS ===');
+    systemUsers.forEach(user => {
+      const notifications = this.notificationService.getNotificationsForUser(
+        user.id, user.roles || [], user.department
+      )();
+      const unreadCount = notifications.filter(n => !n.isRead).length;
+
+      console.log(`${user.name}:`);
+      console.log(`  - Roles: ${user.roles?.join(', ')}`);
+      console.log(`  - Departamento: ${user.department}`);
+      console.log(`  - Notificaciones: ${notifications.length} total, ${unreadCount} sin leer`);
+      console.log('---');
+    });
+    console.log('==========================================');
+  }
+
+  // ✅ RESTO DEL CÓDIGO (sin cambios significativos)
+
+  testMarkAsUnread(): void {
+    const currentUser = this.baseUserInfo();
+    if (!currentUser) return;
+
+    const firstNotification = this.userNotifications()[0];
+    if (firstNotification) {
+      this.notificationService.markAsUnread(firstNotification.id, currentUser.id);
+      console.log(`"${firstNotification.title}" marcada como NO leída para ${currentUser.name}`);
+    }
+  }
+
+  testDebugNotifications(): void {
+    const currentUser = this.baseUserInfo();
+    if (!currentUser) return;
+
+    this.notificationService.debugUserNotifications(
+      currentUser.id,
+      currentUser.roles || [],
+      currentUser.department
+    );
+  }
+
+  testDebugGlobalNotification(): void {
+    const globalNotification = this.notificationService.getAllNotifications()()
+      .find(n => n.isGlobal);
+
+    if (globalNotification) {
+      this.notificationService.debugNotificationReads(globalNotification.id);
+    }
+  }
+
+  simulateMultipleUsersReading(): void {
+    const globalNotification = this.notificationService.getAllNotifications()()
+      .find(n => n.isGlobal);
+
+    if (globalNotification) {
+      const userIds = UserUtils.getAllUserIds().slice(0, 3); // Primeros 3 usuarios
+      userIds.forEach(userId => {
+        const user = UserUtils.getUserById(userId);
+        this.notificationService.markAsRead(globalNotification.id, userId);
+        console.log(`${user?.name} leyó la notificación global`);
+      });
+
+      this.testDebugGlobalNotification();
+    }
+  }
+
+  // ✅ RESTO DEL CÓDIGO (sidebar, tema, etc. - sin cambios)
 
   protected menuItems = signal<MenuItem[]>(sidevarMenuItems);
   private readonly activateButtonInSidebar: boolean = false;
@@ -351,14 +410,28 @@ export class App implements OnInit {
     }
   }
 
+  getUserButtonClass(role: string): string {
+  const baseClasses = 'transition-colors duration-200';
+  switch (role) {
+    case 'admin': return `${baseClasses} bg-red-500 hover:bg-red-600`;
+    case 'manager': return `${baseClasses} bg-blue-500 hover:bg-blue-600`;
+    case 'developer': return `${baseClasses} bg-green-500 hover:bg-green-600`;
+    case 'designer': return `${baseClasses} bg-purple-500 hover:bg-purple-600`;
+    case 'hr': return `${baseClasses} bg-pink-500 hover:bg-pink-600`;
+    case 'qa': return `${baseClasses} bg-orange-500 hover:bg-orange-600`;
+    default: return `${baseClasses} bg-gray-500 hover:bg-gray-600`;
+  }
+}
+
   debugAppState(): void {
     console.log('=== APP STATE DEBUG ===');
-    console.log('User:', this.userInfo());
-    console.log('Base user:', this.baseUserInfo());
-    console.log('User notifications:', this.userNotifications().length);
-    console.log('Unread notifications:', this.unreadNotificationsCount());
-    console.log('Has notifications (computed):', this.hasNotifications());
-    console.log('Has notification permissions:', this.hasNotificationPermissions());
+    console.log('Usuario actual:', this.userInfo()?.name);
+    console.log('Roles:', this.userInfo()?.roles?.join(', '));
+    console.log('Departamento:', this.userInfo()?.department);
+    console.log('Notificaciones del usuario:', this.userNotifications().length);
+    console.log('No leídas:', this.unreadNotificationsCount());
+    console.log('hasNotifications:', this.hasNotifications());
+    console.log('Total usuarios en sistema:', systemUsers.length);
     console.log('=======================');
   }
 }

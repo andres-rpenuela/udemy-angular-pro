@@ -6,3 +6,8 @@ export interface UserInfo {
   hasNotifications: boolean;
   privileges?: string[];
 }
+
+export interface ExtendedUserInfo extends UserInfo {
+  department?: string;
+  avatar?: string;
+}
