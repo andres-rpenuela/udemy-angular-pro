@@ -19,6 +19,13 @@ export class App implements OnInit {
   // ✅ INYECTAR SERVICIO DE NOTIFICACIONES
   private notificationService = inject(NotificationService);
 
+  // ✅ NUEVO: Control del sidebar horizontal
+  protected isHorizontalSidebarOpen = signal<boolean>(true);
+
+  public toggleHorizontalSidebar(): void {
+    this.isHorizontalSidebarOpen.update(current => !current);
+  }
+
   // ✅ ===========================================
   // ✅ CONFIGURACIÓN DE TEMA Y TÍTULO
   // ✅ ===========================================
@@ -411,17 +418,24 @@ export class App implements OnInit {
   }
 
   getUserButtonClass(role: string): string {
-  const baseClasses = 'transition-colors duration-200';
-  switch (role) {
-    case 'admin': return `${baseClasses} bg-red-500 hover:bg-red-600`;
-    case 'manager': return `${baseClasses} bg-blue-500 hover:bg-blue-600`;
-    case 'developer': return `${baseClasses} bg-green-500 hover:bg-green-600`;
-    case 'designer': return `${baseClasses} bg-purple-500 hover:bg-purple-600`;
-    case 'hr': return `${baseClasses} bg-pink-500 hover:bg-pink-600`;
-    case 'qa': return `${baseClasses} bg-orange-500 hover:bg-orange-600`;
-    default: return `${baseClasses} bg-gray-500 hover:bg-gray-600`;
+    const baseClasses = 'transition-all duration-200 hover:shadow-md';
+    switch (role?.toLowerCase()) {
+      case 'admin':
+        return `${baseClasses} bg-red-500 hover:bg-red-600 shadow-red-500/25`;
+      case 'manager':
+        return `${baseClasses} bg-blue-500 hover:bg-blue-600 shadow-blue-500/25`;
+      case 'developer':
+        return `${baseClasses} bg-green-500 hover:bg-green-600 shadow-green-500/25`;
+      case 'designer':
+        return `${baseClasses} bg-purple-500 hover:bg-purple-600 shadow-purple-500/25`;
+      case 'hr':
+        return `${baseClasses} bg-pink-500 hover:bg-pink-600 shadow-pink-500/25`;
+      case 'qa':
+        return `${baseClasses} bg-orange-500 hover:bg-orange-600 shadow-orange-500/25`;
+      default:
+        return `${baseClasses} bg-gray-500 hover:bg-gray-600 shadow-gray-500/25`;
+    }
   }
-}
 
   debugAppState(): void {
     console.log('=== APP STATE DEBUG ===');
