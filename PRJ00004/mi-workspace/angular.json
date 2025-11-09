@@ -30,7 +30,13 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/devarp-side-menu/tsconfig.spec.json"
+            "main": "projects/devarp-side-menu/src/test.ts",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/devarp-side-menu/tsconfig.spec.json",
+            "karmaConfig": "projects/devarp-side-menu/karma.conf.js"
           }
         },
         "lint": {
