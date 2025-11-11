@@ -3,7 +3,9 @@
  */
 
 export * from './lib/devarp-side-menu';
-export * from './lib/devarp-side-menu.service';
+
+export * from './lib/service/devarp-side-menu.service';
+
 export * from './shared/enums/type-color.enum';
 export * from './shared/enums/menu-action.enum';
 

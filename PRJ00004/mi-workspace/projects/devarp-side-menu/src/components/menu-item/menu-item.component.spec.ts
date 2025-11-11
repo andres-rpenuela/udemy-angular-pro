@@ -68,7 +68,7 @@ describe('MenuItemComponent', () => {
     // El elemento tiene que tener el atributo data-login
     const button = fixture.nativeElement.querySelector('[btn-data-expand-button]') as HTMLButtonElement;
 
-    console.log('BUTTON->', button);
+    //console.log('BUTTON->', button);
     // comprobar que el boton exista (tiene un valor positivo)
     expect(button).toBeTruthy();
 
@@ -93,7 +93,7 @@ describe('MenuItemComponent', () => {
     // El elemento tiene que tener el atributo data-login
     const button = fixture.nativeElement.querySelector('[btn-data-expand-button]') as HTMLButtonElement;
 
-    console.log('BUTTON->', button);
+    //console.log('BUTTON->', button);
     // comprobar que el boton no exista
     expect(button).toBeNull();
 
