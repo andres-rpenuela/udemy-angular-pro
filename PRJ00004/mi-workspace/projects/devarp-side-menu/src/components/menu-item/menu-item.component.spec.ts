@@ -1,28 +1,30 @@
 // /* tslint:disable:no-unused-variable */
-// import { ComponentFixture, TestBed } from '@angular/core/testing';
-// import { By } from '@angular/platform-browser';
-// import { DebugElement } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { DebugElement } from '@angular/core';
 
-// import { MenuItemComponent } from './menu-item.component';
+import { MenuItemComponent } from './menu-item.component';
+import { provideRouter } from '@angular/router';
 
-// describe('MenuItemComponent', () => {
-//   let component: MenuItemComponent;
-//   let fixture: ComponentFixture<MenuItemComponent>;
+describe('MenuItemComponent', () => {
+  let component: MenuItemComponent;
+  let fixture: ComponentFixture<MenuItemComponent>;
 
-//   beforeEach(() => {
-//     TestBed.configureTestingModule({
-//       declarations: [ MenuItemComponent ]
-//     })
-//     .compileComponents();
-//   });
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers:[ provideRouter([]) ],
+      imports: [ MenuItemComponent ],
+      // declarations: [ MenuItemComponent ]
+    })
+    .compileComponents();
 
-//   beforeEach(() => {
-//     fixture = TestBed.createComponent(MenuItemComponent);
-//     component = fixture.componentInstance;
-//     fixture.detectChanges();
-//   });
+    fixture = TestBed.createComponent(MenuItemComponent);
+    component = fixture.componentInstance;
+    // fixture.detectChanges();
+  });
 
-//   it('should create', () => {
-//     expect(component).toBeTruthy();
-//   });
-// });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
