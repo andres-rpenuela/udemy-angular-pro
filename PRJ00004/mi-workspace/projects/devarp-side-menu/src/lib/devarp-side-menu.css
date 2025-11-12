@@ -1,0 +1,192 @@
+/* ✅ SIDEBAR FLOTANTE - CSS VANILLA QUE FUNCIONA */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+/* ✅ ESTILOS PARA ENCABEZADOS DE SECCIÓN */
+.sidebar-nav h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.sidebar-nav h3:first-child {
+  margin-top: 0;
+}
+
+/* ✅ SEPARADORES ENTRE SECCIONES */
+.sidebar-nav .section-separator {
+  margin: 0.75rem 0.75rem;
+  height: 1px;
+  background: linear-gradient(to right, rgba(156, 163, 175, 0.4), transparent);
+}
+
+.dark .sidebar-nav .section-separator {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1), transparent);
+}
+/* Ocultar overlay en desktop */
+@media (min-width: 1280px) {
+  .sidebar-overlay {
+    display: none;
+  }
+}
+
+ /* Estado inicial - oculto */
+/*
+.sidebar-container {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 50;
+  height: calc(100vh - 32px);
+  width: 320px;
+
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  flex-direction: column;
+
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 300ms ease-in-out, opacity 300ms ease-in-out;
+} */
+.sidebar-container {
+  @apply fixed top-0 left-0 h-full w-80 shadow-xl transition-transform duration-300 ease-in-out z-50;
+}
+/* Estados de visibilidad */
+/* .sidebar-visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.sidebar-hidden {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+} */
+
+.sidebar-hidden {
+  @apply -translate-x-full lg:translate-x-0;
+}
+
+.sidebar-visible {
+  @apply translate-x-0;
+}
+
+
+/* Desktop - siempre visible */
+@media (min-width: 1280px) {
+  .sidebar-container {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .sidebar-container.sidebar-hidden {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .sidebar-container {
+    width: 280px;
+    left: 8px;
+    width: calc(100vw - 16px);
+    max-width: 280px;
+  }
+
+  .sidebar-hidden {
+    transform: translateX(-110%);
+  }
+}
+
+/* Contenido scrolleable */
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* Scrollbar webkit */
+.sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Navegación */
+.sidebar-nav {
+  padding: 0 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Botón flotante */
+.floating-button {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+  padding: 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: all 300ms ease-in-out;
+}
+
+.floating-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 1280px) {
+  .floating-button {
+    display: none;
+  }
+}
+
+/* Líneas de jerarquía */
+.hierarchy-line-dark {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.hierarchy-line-light {
+  background-color: rgba(156, 163, 175, 0.4);
+}
+
+.hierarchy-line-continuous-dark {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.hierarchy-line-continuous-light {
+  background-color: rgba(209, 213, 219, 0.3);
+}
+
+.hierarchy-dot-dark {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.hierarchy-dot-light {
+  background-color: rgba(107, 114, 128, 0.6);
+}

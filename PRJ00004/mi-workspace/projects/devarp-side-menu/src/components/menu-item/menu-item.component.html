@@ -1,0 +1,111 @@
+<!-- ✅ MENU ITEM SIN LÍNEAS DE JERARQUÍA - FLECHA EN LA MISMA LÍNEA -->
+@if (isValidMenuItem()) {
+  <div class="relative mb-1">
+    <!-- ✅ ITEM EXPANDIBLE SIN RUTA -->
+    @if (isExpandable() && !menuItem().route) {
+      <button
+        [class]="itemClasses()"
+        type="button"
+        (click)="handleToggleExpansion($event)">
+
+        <!-- Icono del item -->
+        <div class="w-5 h-5 flex-shrink-0 mr-3">
+          @if (menuItem().icon && menuItem().icon?.trim() !== '') {
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+              <path [attr.d]="menuItem().icon"></path>
+            </svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V9a2 2 0 00-2-2H5z"></path>
+            </svg>
+          }
+        </div>
+
+        <!-- Texto del item -->
+        <span class="flex-1 text-left font-medium">{{ menuItem().label }}</span>
+
+        <!-- ✅ Flecha de expansión EN LA MISMA LÍNEA -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          [class]="'w-4 h-4 transition-transform duration-200 flex-shrink-0 ml-2 ' + (isExpanded() ? 'rotate-90' : '')">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    }
+
+    <!-- ✅ ITEM CON RUTA Y POSIBLES SUBITEMS -->
+    @else if (menuItem().route) {
+      <!-- ✅ UN SOLO BOTÓN QUE MANEJA NAVEGACIÓN Y EXPANSIÓN -->
+      <div class="flex items-center">
+        <!-- Parte navegable (ocupa la mayor parte) -->
+        <a [routerLink]="menuItem().route" class="flex-1">
+          <button [class]="itemClasses()" type="button">
+            <!-- Icono del item -->
+            <div class="w-5 h-5 flex-shrink-0 mr-3">
+              @if (menuItem().icon && menuItem().icon?.trim() !== '') {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                  <path [attr.d]="menuItem().icon"></path>
+                </svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              }
+            </div>
+
+            <!-- Texto del item -->
+            <span class="flex-1 text-left font-medium">{{ menuItem().label }}</span>
+          </button>
+        </a>
+
+        <!-- ✅ Botón de expansión EN LA MISMA LÍNEA (solo si tiene subitems) -->
+        @if (hasSubItems()) {
+          <button
+            [class]="'p-2 rounded-lg transition-colors ' + (isDarkMode() ? 'hover:bg-white/10 text-white/70' : 'hover:bg-gray-100 text-gray-500')"
+            type="button"
+            (click)="handleToggleExpansion($event)"  btn-data-expand-button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              [class]="'w-4 h-4 transition-transform duration-200 ' + (isExpanded() ? 'rotate-90' : '')">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        }
+      </div>
+    }
+
+    <!-- ✅ ITEM CON HREF EXTERNO -->
+    @else if (menuItem().href) {
+      <a [href]="menuItem().href" target="_blank" class="block">
+        <button [class]="itemClasses()" type="button">
+          <!-- Icono del item -->
+          <div class="w-5 h-5 flex-shrink-0 mr-3">
+            @if (menuItem().icon && menuItem().icon?.trim() !== '') {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                <path [attr.d]="menuItem().icon"></path>
+              </svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+            }
+          </div>
+
+          <!-- Texto del item -->
+          <span class="flex-1 text-left font-medium">{{ menuItem().label }}</span>
+
+          <!-- Icono de enlace externo -->
+          <svg class="w-4 h-4 flex-shrink-0 opacity-60 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+        </button>
+      </a>
+    }
+  </div>
+}

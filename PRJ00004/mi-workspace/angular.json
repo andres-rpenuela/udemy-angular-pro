@@ -1,0 +1,150 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm",
+    "schematicCollections": [
+      "angular-eslint"
+    ]
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "devarp-side-menu": {
+      "projectType": "library",
+      "root": "projects/devarp-side-menu",
+      "sourceRoot": "projects/devarp-side-menu/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/devarp-side-menu/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/devarp-side-menu/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "main": "projects/devarp-side-menu/src/test.ts",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/devarp-side-menu/tsconfig.spec.json",
+            "karmaConfig": "projects/devarp-side-menu/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/devarp-side-menu/**/*.ts",
+              "projects/devarp-side-menu/**/*.html"
+            ],
+            "eslintConfig": "projects/devarp-side-menu/eslint.config.js"
+          }
+        }
+      }
+    },
+    "dev-testdev-app": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "projects/dev-testdev-app",
+      "sourceRoot": "projects/dev-testdev-app/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/dev-testdev-app/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "projects/dev-testdev-app/tsconfig.app.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/dev-testdev-app/public"
+              }
+            ],
+            "styles": [
+              "projects/dev-testdev-app/src/styles.css"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "dev-testdev-app:build:production"
+            },
+            "development": {
+              "buildTarget": "dev-testdev-app:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/dev-testdev-app/tsconfig.spec.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/dev-testdev-app/public"
+              }
+            ],
+            "styles": [
+              "projects/dev-testdev-app/src/styles.css"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/dev-testdev-app/**/*.ts",
+              "projects/dev-testdev-app/**/*.html"
+            ],
+            "eslintConfig": "projects/dev-testdev-app/eslint.config.js"
+          }
+        }
+      }
+    }
+  }
+}

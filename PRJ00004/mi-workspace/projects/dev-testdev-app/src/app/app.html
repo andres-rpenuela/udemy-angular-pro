@@ -1,0 +1,577 @@
+<!-- ✅ COMPONENTE SIDEBAR CON NOTIFICACIONES -->
+<devarp-side-menu
+  [titleText]="'DevArp'"
+  [colorTitle]="titleColor()"
+  [subtitleText]="'Corporation'"
+  [navItems]="menuItems()"
+  [userInfo]="userInfo()"
+  [useButtonFloatingChildComponent]="true"
+  [initialDarkMode]="isDarkMode()"
+  [isAuthenticated]="isAuthenticated()"
+  [onDebugMode]="true"
+  (onThemeChange)="onThemeChange($event)"
+  (onSidebarStateChange)="onSidebarStateChange($event)">
+</devarp-side-menu>
+
+
+<!-- ✅ CONTENIDO PRINCIPAL CON MARGEN IZQUIERDO PARA EL SIDEBAR -->
+<div class="min-h-screen transition-all duration-300 ml-0 lg:ml-80"
+     [class]="isDarkMode() ? 'bg-gray-900' : 'bg-gray-100'">
+  <div class="p-6">
+
+    <!-- ✅ HEADER PRINCIPAL -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold transition-colors duration-300"
+          [class]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+        Dashboard de Notificaciones
+      </h1>
+      <p class="text-lg transition-colors duration-300"
+         [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-600'">
+        Sistema de gestión de notificaciones por usuario y roles
+      </p>
+    </div>
+
+    <!-- ✅ SECCIÓN DE CONTROL DE USUARIO Y ROLES -->
+    <div
+      class="rounded-lg shadow-sm border p-6 mb-8 transition-colors duration-300"
+      [class]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'"
+    >
+      <h3
+        class="text-lg font-semibold mb-4 transition-colors duration-300"
+        [class]="isDarkMode() ? 'text-white' : 'text-gray-900'"
+      >
+        Control de Usuario y Roles
+      </h3>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Info del usuario actual -->
+        <div>
+          <h4
+            class="text-sm font-medium mb-2 transition-colors duration-300"
+            [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-700'"
+          >
+            Usuario Actual
+          </h4>
+
+          <!-- ✅ INFO DEL USUARIO MEJORADA -->
+          <div
+            class="rounded-md p-4 transition-colors duration-300"
+            [class]="isDarkMode() ? 'bg-gray-700' : 'bg-gray-50'"
+          >
+            @if (userInfo()) {
+            <!-- Header con avatar y nombre -->
+            <div class="flex items-center space-x-3 mb-3">
+              <div
+                class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center"
+              >
+                <span class="text-white font-semibold text-sm">
+                  {{ userInfo()?.avatar ||
+                  userInfo()?.name?.charAt(0)?.toUpperCase() }}
+                </span>
+              </div>
+              <div class="flex-1">
+                <p
+                  class="text-sm font-medium transition-colors duration-300"
+                  [class]="isDarkMode() ? 'text-white' : 'text-gray-900'"
+                >
+                  {{ userInfo()!.name }}
+                </p>
+                <p
+                  class="text-xs transition-colors duration-300"
+                  [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'"
+                >
+                  {{ userInfo()!.email }}
+                </p>
+              </div>
+              <!-- Indicador de notificaciones -->
+              <div class="flex-shrink-0">
+                <div
+                  class="w-3 h-3 rounded-full"
+                  [class]="userInfo()?.hasNotifications ? 'bg-red-500 animate-pulse' : 'bg-green-500'"
+                >
+                </div>
+              </div>
+            </div>
+
+            <!-- Roles como badges -->
+            <div class="flex flex-wrap gap-1 mb-3">
+              @if (userInfo()?.roles) { @for (role of userInfo()!.roles; track
+              role) {
+              <span
+                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-colors duration-300"
+                [class]="isDarkMode() ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'"
+              >
+                {{ role | titlecase }}
+              </span>
+              } }
+            </div>
+
+            <!-- Departamento -->
+            @if (userInfo()?.department) {
+            <div class="flex items-center space-x-2 mb-3">
+              <svg
+                class="w-4 h-4 transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2-2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                ></path>
+              </svg>
+              <span
+                class="text-xs transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-600'"
+              >
+                {{ userInfo()!.department | titlecase }}
+              </span>
+            </div>
+            }
+
+            <!-- Estadísticas de notificaciones -->
+            <div
+              class="pt-3 border-t transition-colors duration-300"
+              [class]="isDarkMode() ? 'border-gray-600' : 'border-gray-300'"
+            >
+              <div class="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <div
+                    class="text-lg font-bold transition-colors duration-300"
+                    [class]="isDarkMode() ? 'text-blue-400' : 'text-blue-600'"
+                  >
+                    {{ userNotifications().length }}
+                  </div>
+                  <div
+                    class="text-xs transition-colors duration-300"
+                    [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'"
+                  >
+                    Visibles
+                  </div>
+                </div>
+                <div>
+                  <div
+                    class="text-lg font-bold transition-colors duration-300"
+                    [class]="unreadNotificationsCount() > 0 ? 'text-red-500' : 'text-green-500'"
+                  >
+                    {{ unreadNotificationsCount() }}
+                  </div>
+                  <div
+                    class="text-xs transition-colors duration-300"
+                    [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'"
+                  >
+                    Sin leer
+                  </div>
+                </div>
+              </div>
+            </div>
+            } @else {
+            <!-- Estado sin usuario -->
+            <div class="text-center py-6">
+              <svg
+                class="w-12 h-12 mx-auto mb-2 transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-gray-500' : 'text-gray-400'"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                ></path>
+              </svg>
+              <p
+                class="text-sm font-medium transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-600'"
+              >
+                No hay usuario logueado
+              </p>
+              <p
+                class="text-xs transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'"
+              >
+                Selecciona un usuario para continuar
+              </p>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- ✅ BOTONES DE TESTING CON USUARIOS UNIFICADOS -->
+        <div>
+          <h4
+            class="text-sm font-medium mb-2 transition-colors duration-300"
+            [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-700'"
+          >
+            Probar Diferentes Usuarios
+          </h4>
+
+          <!-- ✅ GRID DE USUARIOS REALES -->
+          <div class="grid grid-cols-2 gap-2">
+            @for (testUser of testUsers(); track testUser.id) {
+            <button
+              class="px-3 py-2 text-white text-sm rounded-md transition-all duration-200 flex items-center space-x-2 hover:scale-105"
+              [class]="getUserButtonClass(testUser?.roles?.[0] || 'user')"
+              (click)="changeUser(testUser)"
+              [title]="testUser.email"
+            >
+              <!-- Avatar con iniciales -->
+              <div
+                class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"
+              >
+                <span class="text-xs font-medium">
+                  {{ testUser.avatar || testUser.name.charAt(0) }}
+                </span>
+              </div>
+
+              <!-- Nombre (sin el role label que agregamos para testing) -->
+              <span class="truncate text-left">
+                {{ testUser.name.split(' (')[0] }}
+              </span>
+
+              <!-- Indicador de rol -->
+              <div class="w-2 h-2 bg-white/30 rounded-full flex-shrink-0"></div>
+            </button>
+            }
+
+            <!-- ✅ BOTÓN DE LOGOUT -->
+            <button
+              class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition-all duration-200 flex items-center justify-center space-x-2 hover:scale-105"
+              (click)="logout()"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                ></path>
+              </svg>
+              <span>Logout</span>
+            </button>
+          </div>
+
+          <!-- ✅ BOTONES DE TESTING ADICIONALES -->
+          <div class="mt-4">
+            <h5
+              class="text-xs font-medium mb-2 transition-colors duration-300"
+              [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-600'"
+            >
+              Testing Rápido
+            </h5>
+            <div class="grid grid-cols-3 gap-1">
+              <button
+                class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs rounded transition-colors"
+                (click)="testSendTaskToCurrentUser()"
+                title="Enviar tarea al usuario actual"
+              >
+                Tarea 📝
+              </button>
+              <button
+                class="px-2 py-1 bg-cyan-500 hover:bg-cyan-600 text-white text-xs rounded transition-colors"
+                (click)="testSendGlobalAnnouncement()"
+                title="Anuncio para todos los usuarios"
+              >
+                Global 📢
+              </button>
+              <button
+                class="px-2 py-1 bg-violet-500 hover:bg-violet-600 text-white text-xs rounded transition-colors"
+                (click)="testShowAllUsersStats()"
+                title="Ver estadísticas de todos los usuarios"
+              >
+                Stats 📊
+              </button>
+            </div>
+          </div>
+
+          <!-- ✅ INDICADOR DE USUARIO ACTUAL -->
+          @if (userInfo()) {
+          <div
+            class="mt-4 p-2 rounded-md transition-colors duration-300"
+            [class]="isDarkMode() ? 'bg-green-900/20 border border-green-800' : 'bg-green-50 border border-green-200'"
+          >
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+              ></div>
+              <span
+                class="text-xs font-medium transition-colors duration-300"
+                [class]="isDarkMode() ? 'text-green-400' : 'text-green-700'"
+              >
+                Usuario activo: {{ userInfo()!.name.split(' ')[0] }}
+              </span>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ SECCIÓN DE TESTING AVANZADO -->
+    <div
+      class="rounded-lg shadow-sm border p-6 mb-8 transition-colors duration-300"
+      [class]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'"
+    >
+      <h3
+        class="text-lg font-semibold mb-4 transition-colors duration-300"
+        [class]="isDarkMode() ? 'text-white' : 'text-gray-900'"
+      >
+        Testing Avanzado de Notificaciones
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- ✅ SECCIÓN: NOTIFICACIONES POR USUARIO -->
+        <div class="space-y-2">
+          <h4
+            class="text-sm font-medium transition-colors duration-300"
+            [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-700'"
+          >
+            Notificaciones por Usuario
+          </h4>
+          <div class="space-y-1">
+            <button
+              class="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md transition-colors"
+              (click)="testSendTaskToCurrentUser()"
+            >
+              Tarea a Usuario Actual
+            </button>
+            <button
+              class="w-full px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm rounded-md transition-colors"
+              (click)="testSendTaskToRandomUser()"
+            >
+              Tarea a Usuario Aleatorio
+            </button>
+            <button
+              class="w-full px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded-md transition-colors"
+              (click)="addNotificationToCurrentUser()"
+            >
+              Notificación de Prueba
+            </button>
+          </div>
+        </div>
+
+        <!-- ✅ SECCIÓN: NOTIFICACIONES POR ROL -->
+        <div class="space-y-2">
+          <h4
+            class="text-sm font-medium transition-colors duration-300"
+            [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-700'"
+          >
+            Notificaciones por Rol
+          </h4>
+          <div class="space-y-1">
+            <button
+              class="w-full px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition-colors"
+              (click)="testSendAnnouncementToAdmins()"
+            >
+              Anuncio a Admins
+            </button>
+            <button
+              class="w-full px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md transition-colors"
+              (click)="testSendAnnouncementToDevelopers()"
+            >
+              Anuncio a Developers
+            </button>
+            <button
+              class="w-full px-3 py-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm rounded-md transition-colors"
+              (click)="testSendGlobalAnnouncement()"
+            >
+              Anuncio Global
+            </button>
+          </div>
+        </div>
+
+        <!-- ✅ SECCIÓN: TESTING Y DEBUG -->
+        <div class="space-y-2">
+          <h4
+            class="text-sm font-medium transition-colors duration-300"
+            [class]="isDarkMode() ? 'text-gray-300' : 'text-gray-700'"
+          >
+            Testing y Debug
+          </h4>
+          <div class="space-y-1">
+            <button
+              class="w-full px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-md transition-colors"
+              (click)="clearAllNotificationsForCurrentUser()"
+            >
+              Marcar Todas Leídas
+            </button>
+            <button
+              class="w-full px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm rounded-md transition-colors"
+              (click)="testMarkAsUnread()"
+            >
+              Marcar Como No Leída
+            </button>
+            <button
+              class="w-full px-3 py-2 bg-pink-500 hover:bg-pink-600 text-white text-sm rounded-md transition-colors"
+              (click)="testDebugNotifications()"
+            >
+              Debug Usuario Actual
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ BOTONES DE TESTING ESPECÍFICOS -->
+      <div
+        class="mt-6 pt-4 border-t transition-colors duration-300"
+        [class]="isDarkMode() ? 'border-gray-600' : 'border-gray-300'"
+      >
+        <h5
+          class="text-xs font-medium mb-2 transition-colors duration-300"
+          [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-600'"
+        >
+          Testing Multi-Usuario
+        </h5>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button
+            class="px-2 py-1 bg-teal-500 hover:bg-teal-600 text-white text-xs rounded transition-colors"
+            (click)="testDebugGlobalNotification()"
+          >
+            Debug Global
+          </button>
+          <button
+            class="px-2 py-1 bg-rose-500 hover:bg-rose-600 text-white text-xs rounded transition-colors"
+            (click)="simulateMultipleUsersReading()"
+          >
+            Multi-Lectura
+          </button>
+          <button
+            class="px-2 py-1 bg-violet-500 hover:bg-violet-600 text-white text-xs rounded transition-colors"
+            (click)="testShowAllUsersStats()"
+          >
+            Stats Usuarios
+          </button>
+          <button
+            class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs rounded transition-colors"
+            (click)="debugAppState()"
+          >
+            Debug App
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ SECCIÓN DE PANEL DE NOTIFICACIONES (cuando está abierto) -->
+    @if (showNotificationsPanel()) {
+    <div
+      class="fixed inset-0 bg-black/50 z-50 lg:hidden"
+      (click)="toggleNotificationsPanel()"
+    ></div>
+    <div
+      class="fixed top-0 right-0 h-full w-96 bg-white dark:bg-gray-800 shadow-xl z-50 transform transition-transform duration-300"
+    >
+      <div class="p-4 border-b dark:border-gray-700">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold dark:text-white">Notificaciones</h3>
+          <button
+            class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            (click)="toggleNotificationsPanel()"
+          >
+            <svg
+              class="w-5 h-5 dark:text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4">
+        @if (getNotificationsList().length > 0) { @for (notification of
+        getNotificationsList(); track notification.id) {
+        <div
+          class="mb-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600"
+          [class]="!notification.isRead ? 'border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800' : 'border-gray-200 dark:border-gray-600'"
+          (click)="handleNotificationClick(notification)"
+        >
+          <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+              @if (!notification.isRead) {
+              <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+              }
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium dark:text-white"
+                >{{ notification.title }}</p
+              >
+              <p class="text-xs text-gray-600 dark:text-gray-400 truncate"
+                >{{ notification.message }}</p
+              >
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"
+                >{{ notification.timestamp | date:'short' }}</p
+              >
+            </div>
+          </div>
+        </div>
+        } } @else {
+        <div class="text-center py-8">
+          <svg
+            class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 17h5l-5-5V9a6 6 0 10-12 0v3l-5 5h5a3 3 0 006 0z"
+            ></path>
+          </svg>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-2"
+            >No hay notificaciones</p
+          >
+        </div>
+        }
+      </div>
+
+      @if (getNotificationsList().length > 0) {
+      <div class="p-4 border-t dark:border-gray-700">
+        <div class="flex space-x-2">
+          <button
+            class="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md transition-colors"
+            (click)="markAllAsRead()"
+          >
+            Marcar todas como leídas
+          </button>
+          <button
+            class="flex-1 px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded-md transition-colors"
+            (click)="viewAllNotifications()"
+          >
+            Ver todas
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- ✅ FOOTER CON INFORMACIÓN -->
+    <div class="mt-8 text-center">
+      <p
+        class="text-sm transition-colors duration-300"
+        [class]="isDarkMode() ? 'text-gray-400' : 'text-gray-600'"
+      >
+        Sistema de notificaciones desarrollado con Angular 18+ y Signals ⚡
+      </p>
+    </div>
+  </div>
+</div>

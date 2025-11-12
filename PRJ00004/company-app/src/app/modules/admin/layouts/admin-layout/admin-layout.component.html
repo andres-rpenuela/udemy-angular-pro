@@ -1,0 +1,19 @@
+<!-- component -->
+<div class="min-h-screen bg-gray-50/50">
+  <app-aside-menu
+    [isAuthenticated]="isAuthenticated()"
+    (onSignOut)="onLogout()"
+    (onSignIn)="onLogin()"
+    ></app-aside-menu>
+
+  <div class="p-4 xl:ml-80">
+    <app-nav-menu></app-nav-menu>
+
+    <div class="mt-12">
+      <router-outlet/>
+    </div>
+
+    <!-- footer -->
+    <app-footer></app-footer>
+  </div>
+</div>

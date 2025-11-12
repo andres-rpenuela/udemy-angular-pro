@@ -1,0 +1,16 @@
+{
+  "name": "devarp-side-menu",
+  "version": "1.0.0",
+  "peerDependencies": {
+    "@angular/common": "^20.3.0",
+    "@angular/core": "^20.3.0",
+    "zone.js": ">=0.13.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "zone.js": "^0.15.1"
+  }
+}
