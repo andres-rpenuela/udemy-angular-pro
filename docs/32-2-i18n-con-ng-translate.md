@@ -1,10 +1,13 @@
 # Internazionalización con i18n con `@ng-translate` con `@ng-cookie-server`
 
-[1](#-configuración-de-cookiesheaders-personalizados-en-angular)
+[1 Configuración de Cookies/Headers Personalizados en Angular
+](#-configuración-de-cookiesheaders-personalizados-en-angular)
 
-[2](#-trabajando-con-cookies-en-angular)
-[2.1](#1-usando-document-nativo)
-[2.2](#2-usando-ngx-cookie-service-ssr-recomendado)
+[2 Trabajando con Cookies en Angular](#-trabajando-con-cookies-en-angular)
+[2.1 Usando Document (Nativo)](#1-usando-document-nativo)
+[2.2 Usando ngx-cookie-service](#2-usando-ngx-cookie-service)
+[2.3 Usando ngx-cookie-service-ssr](#3-usando-ngx-cookie-service-ssr)
+[3]
 
 ## 🔧 Configuración de Cookies/Headers Personalizados en Angular
 
@@ -83,7 +86,7 @@ export class CookieService {
 }
 ````
 
-### **2. Usando ngx-cookie-service (Recomendado)**
+### **2. Usando ngx-cookie-service**
 
 > Link del paquete [ngpx-cookie-service](https://www.npmjs.com/package/ngx-cookie-service/v/12.0.0)
 
@@ -153,7 +156,7 @@ export class ExampleComponent {
 }
 ````
 
-### **3. Usando ngx-cookie-service-ssr (Recomendado)**
+### **3. Usando ngx-cookie-service-ssr**
 
 Link del paquete: [ng-cookie-service-ssr](https://www.npmjs.com/package/ngx-cookie-service-ssr)
 
@@ -267,6 +270,10 @@ export class LanguagesService {
 
   private readonly SUPPORTED_LANGUAGES: LANGUAGE[] = ['en', 'es', 'fr'];
 
+  private cookieEffect = effect( () ={
+    console.log('Cookie leida: '+ this.cookie.get('lang'));
+  })
+
   constructor() { }
 
   changeLanguage(lang: LANGUAGE) {
@@ -278,6 +285,16 @@ export class LanguagesService {
   }
 }
 ```
+
+**IMPORTATE** Bug en `ngx-cookie-server-ssr`
+
+Esto hara que se guarde la COOKIE en el navegador, pero en el servidor node que guarda, ni lee, es decir, `this.cookie.get('lang') = ''`, cuando se ejecuta en `server`, lo que implicará realizar una modificación.
+
+![alt text](imgs/ssr-client-serve-lenguage-log.png)
+![alt text](imgs/cookie-lang.png)
+
+
+# 3. 
 
 ----
 

@@ -18,13 +18,13 @@ export class LanguagesService {
 
   public currentLanguage = linkedSignal<LANGUAGE>(() => {
     const cookieValue = this.cookie.get(this.LANG_COOKIE_KEY) as LANGUAGE;
-    console.log(`🍪 [${this.plantformId}] Cookie leída:`, cookieValue);
-    return cookieValue || this.DEFAULT_LANGUAGE;
+    console.debug(`🍪 [${this.plantformId}] Cookie leída:`, cookieValue);
+    return cookieValue;//|| this.DEFAULT_LANGUAGE;
   });
 
   public savedLangCookie = effect( () => {
+    console.debug(`🍪 [${this.plantformId}] Gurando Idioma:`, this.currentLanguage());
 
-    console.log('Ejecutado en:' + this.plantformId + ', Guardando cookie:', this.currentLanguage());    // TODO cambio de idoma
     this.cookie.set( this.LANG_COOKIE_KEY ,this.currentLanguage(), {expires: this.EXPIRATION_DAYS}); // 3 dias
   });
 
@@ -56,3 +56,4 @@ export class LanguagesService {
     return [...this.SUPPORTED_LANGUAGES];
   }
 }
+

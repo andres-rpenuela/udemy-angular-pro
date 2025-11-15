@@ -7,20 +7,20 @@ import { serverRoutes } from './app.routes.server';
 const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(withRoutes(serverRoutes)),
-    // {
-    //   provide: 'REQUEST',
-    //   useFactory: (injector: Injector) => {
-    //     return injector.get(REQUEST, null);
-    //   },
-    //   deps: [Injector]
-    // },
-    // {
-    //   provide: 'RESPONSE',
-    //   useFactory: (injector: Injector) => {
-    //     return injector.get(RESPONSE_INIT, null);
-    //   },
-    //   deps: [Injector]
-    // }
+    {
+      provide: 'REQUEST',
+      useFactory: (injector: Injector) => {
+        return injector.get(REQUEST, null);
+      },
+      deps: [Injector]
+    },
+    {
+      provide: 'RESPONSE',
+      useFactory: (injector: Injector) => {
+        return injector.get(RESPONSE_INIT, null);
+      },
+      deps: [Injector]
+    }
   ]
 };
 
