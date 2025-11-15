@@ -57,3 +57,45 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+## Run cliente
+```bash
+npx ng serve
+```
+
+## Run ssr
+```bash
+# Limpiar y rebuildar todo
+rm -rf dist/
+rm -rf .angular/
+
+# O en Windows
+rmdir /s dist
+rmdir /s .angular
+
+## Con node
+npm run build
+npx npm run serve:ssr:i18n-app
+```
+
+```ts
+// Para ver los logs de la requests, añadir `console.log('📥 Request recibido:', req.method, req.url);`
+
+//server.ts
+/**
+ * Handle all other requests by rendering the Angular application.
+ */
+app.use((req, res, next) => {
+  angularApp
+    .handle(req)
+    .then((response) =>{
+      console.log('📥 Request recibido:', req.method, req.url);
+
+      return response ? writeResponseToNodeResponse(response, res) : next();
+    })
+    .catch(next);
+});
+
+```
+

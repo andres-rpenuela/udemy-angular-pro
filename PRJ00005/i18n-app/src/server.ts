@@ -41,9 +41,11 @@ app.use(
 app.use((req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) =>{
+      console.log('📥 Request recibido:', req.method, req.url);
+
+      return response ? writeResponseToNodeResponse(response, res) : next();
+    })
     .catch(next);
 });
 
