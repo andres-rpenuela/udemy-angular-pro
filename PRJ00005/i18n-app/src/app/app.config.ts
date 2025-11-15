@@ -1,9 +1,14 @@
-import { ApplicationConfig, inject, PLATFORM_ID, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, REQUEST, RESPONSE_INIT } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, inject, PLATFORM_ID, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, REQUEST, RESPONSE_INIT } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import {SsrCookieService} from 'ngx-cookie-service-ssr';
+import {  provideHttpClient, withFetch } from '@angular/common/http';
+
+import {   provideTranslateService, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,20 +22,19 @@ export const appConfig: ApplicationConfig = {
 
 
     /** Configuracion para ng-transalte */
-    // // 🌐 HTTP Client (necesario para ngx-translate)
-    // provideHttpClient(),
+    // 🌐 HTTP Client (necesario para ngx-translate)
+    provideHttpClient( withFetch()),
 
-    // // 🌍 NGX-Translate
-    // importProvidersFrom(
-    //   TranslateModule.forRoot({
-    //     loader: {
-    //       provide: TranslateLoader,
-    //       useFactory: HttpLoaderFactory,
-    //       deps: [HttpClient]
-    //     },
-    //     defaultLanguage: 'en'
-    //   })
-    // ),
+    // 🌍 NGX-Translate
+    // Opción A.
+    provideTranslateService({
+      lang: 'en',
+      fallbackLang: 'en',
+      loader: provideTranslateHttpLoader({
+        prefix: './assets/i18n/',
+        suffix: '.json'
+      })
+    }),
 
     // // 🎯 APIs del navegador como providers
     // // Api del navegador (window)

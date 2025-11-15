@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { LANGUAGE, LanguagesService } from '../../services/languages.service';
+import { LANGUAGE, LanguagesService } from '../../services/language/languages.service';
 
 @Component({
   selector: 'app-lenguage-selector',
@@ -34,5 +34,9 @@ export class LenguageSelectorComponent implements OnInit {
 
     this.languageServices.changeLanguageFromString(selectedLanguage);
 
+  }
+
+  get currentLanguage() {
+    return this.languageServices.currentLanguage;
   }
 }

@@ -7,7 +7,7 @@
 [2.1 Usando Document (Nativo)](#1-usando-document-nativo)
 [2.2 Usando ngx-cookie-service](#2-usando-ngx-cookie-service)
 [2.3 Usando ngx-cookie-service-ssr](#3-usando-ngx-cookie-service-ssr)
-[3]
+[3 Incorporar `ngx-transalate`]
 
 ## 🔧 Configuración de Cookies/Headers Personalizados en Angular
 
@@ -294,9 +294,72 @@ Esto hara que se guarde la COOKIE en el navegador, pero en el servidor node que 
 ![alt text](imgs/cookie-lang.png)
 
 
-# 3. 
+# 3. Incorporar `ngx-transalate`
 
-----
+Con la dependneica `ngx-translate`, damos soporte a la internazionalización (i18n) para  ser implementada de forma sencilla, el problema es que se basa en modulos por lo que se debe adaptar en apliacioens standalone.
+
+Web oficial: https://ngx-translate.org/
+Paquete npm: https://www.npmjs.com/package/@ngx-translate/core
+Babel edit: https://www.codeandweb.com/babeledit
+
+1. Instalar la dependencia.
+
+```bash
+# Verificar si están instaladas:
+../i18n-app>npm list @ngx-translate/core @ngx-translate/http-loader
+
+# Si no están instaladas:
+../i18n-app>npm install @ngx-translate/core @ngx-translate/http-loader
+```
+
+2. Cargar el modulo en `app.config.ts`
+
+```ts
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes), provideClientHydration(withEventReplay()),
+
+    // Configruacion global de servicios
+    // 🍪 Cookies SSR
+    SsrCookieService,
+
+    /** Configuracion para ng-transalte */
+    // 🌐 HTTP Client (necesario para ngx-translate)
+    provideHttpClient( withFetch() ),
+
+    // 🌍 NGX-Translate
+    /** Configuracion para ng-transalte */
+    // 🌐 HTTP Client (necesario para ngx-translate)
+    provideHttpClient( withFetch()),
+
+    // 🌍 NGX-Translate
+    provideTranslateService({
+     lang: 'en',
+     fallbackLang: 'en',
+     loader: provideTranslateHttpLoader({
+       prefix: '/i18n/',
+       suffix: '.json'
+     })
+    }),
+
+  ]
+};
+```
+
+3. Crear estrucutra de archvios
+
+> Nota: Puedes usar `BabelEdit`, para generar los ficheros con las traducciones
+```bash
+# Crear carpeta de traducciones
+mkdir -p i18n-app/public/assets/i18n
+
+# Crear archivos de ejemplo
+echo '{"HELLO": "Hello", "WELCOME": "Welcome to our app!"}' > 18n-app/public/assets/i18n/en.json
+echo '{"HELLO": "Hola", "WELCOME": "¡Bienvenido a nuestra aplicación!"}' > 18n-app/public/assets/i18n/es.json
+echo '{"HELLO": "Bonjour", "WELCOME": "Bienvenue dans notre application!"}' > 18n-app/public/assets/i18n/fr.json
+```
 
 # Aneox: 🔒 **Mejores prácticas de seguridad**
 
@@ -332,6 +395,9 @@ export class SecureCookieService {
 
 Probar la apalicacion
 ```bash
+// Limpiar
+npx ng cache clean
+
 # Desarrollo
 npx npm run start
 
