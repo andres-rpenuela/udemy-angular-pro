@@ -39,8 +39,39 @@ app.use(
  * Handle all other requests by rendering the Angular application.
  */
 app.use((req, res, next) => {
+  console.debug('🖥️ [EXPRESS] Request:', req.method, req.url);
+  console.debug('🍪 [EXPRESS] Raw cookies:', req.headers.cookie);
+
+  const cookieStoring = req.headers.cookie || ''; // lang=es;otherCookie=otherValue;..
+
+  // ✅ MANTENER CONSISTENCIA CON EL NOMBRE
+  const langCookie = cookieStoring
+    .split(';')
+    .map((c: string) => c.trim())
+    .find((c: string) => c.startsWith('lang=')) ?? 'lang=es';
+
+  const [, langValue] = langCookie.split('=');
+  console.debug('🌍 [EXPRESS] Lenguaje detectado:', langValue);
+
+  // ✅ VALIDAR IDIOMA
+  const supportedLanguages = ['es', 'en', 'fr','it'];
+  const validLang = supportedLanguages.includes(langValue) ? langValue : 'it';
+
+  // ✅ AGREGAR AL REQUEST PARA QUE ANGULAR LO PUEDA USAR
+  (req as any).detectedLanguage = validLang;
+
+
+
   angularApp
-    .handle(req)
+    .handle(req,{
+      // ✅ PASAR CONTEXT A ANGULAR
+      providers: [
+        {
+          provide: 'DETECTED_LANGUAGE',
+          useValue: validLang
+        }
+      ]
+    })
     .then((response) =>{
       console.log('📥 Request recibido:', req.method, req.url);
 

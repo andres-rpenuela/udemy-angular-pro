@@ -130,4 +130,89 @@ const serverConfig: ApplicationConfig = {
         console.debug('Lenguaje del servidor:', serverLanguage);
       }
     }
-`` 
+```
+
+## Para leer la `cookie` del navegador en el servidor:
+
+1. En `server.js`
+
+```ts
+app.use((req, res, next) => {
+  console.debug('Eco Server req:', req);
+  console.debug('cookies:', req.headers.cookie);
+  const cookieStoring = req.headers.cookie || '';  // lang=en-US;otherCookie=otherValue;..
+  const langCookie = cookieStoring
+    .split(';')
+    .map((c: string) => c.trim())
+    .find((c: string) => c.startsWith('lang=')) ?? 'lang=en-US';
+
+  const [, langValue] = langCookie.split('=');
+  console.debug('🍪 Lenguaje desde cookie:', langValue);
+
+
+  angularApp
+    .handle(req,{
+      // ✅ PASAR CONTEXT A ANGULAR
+      providers: [
+        {
+          provide: 'DETECTED_LANGUAGE',
+          useValue: langValue
+        }
+      ]
+    })
+    .then((response) =>{
+      console.log('📥 Request recibido:', req.method, req.url);
+
+      return response ? writeResponseToNodeResponse(response, res) : next();
+    })
+    .catch(next);
+});
+```
+2. En el contexto de angular
+
+```ts
+    {
+      provide: SERVER_LANGUAGE_TOKEN,
+      useFactory: (req: any, injector: Injector) => {
+        console.debug('🔧 [CONFIG] SERVER_LANGUAGE_TOKEN factory called');
+        console.debug('🔧 [CONFIG] REQUEST object:', req);
+
+        // ✅ ESTRATEGIA 1: Usar el idioma detectado en Express
+        if (req && (req as any).detectedLanguage) {
+          const detectedLang = (req as any).detectedLanguage;
+          console.debug('🌍 [CONFIG] Using detected language from Express:', detectedLang);
+          return detectedLang;
+        }
+
+        // ✅ ESTRATEGIA 2: Intentar obtener desde DETECTED_LANGUAGE token
+        try {
+          const detectedFromToken = injector.get('DETECTED_LANGUAGE', null);
+          if (detectedFromToken) {
+            console.debug('🌍 [CONFIG] Using language from DETECTED_LANGUAGE token:', detectedFromToken);
+            return detectedFromToken;
+          }
+        } catch (e) {
+          console.debug('🔧 [CONFIG] No DETECTED_LANGUAGE token found');
+        }
+
+        // ✅ ESTRATEGIA 3: Parsear cookies directamente (fallback)
+        if (req && req.headers && req.headers.cookie) {
+          const cookies = req.headers.cookie;
+          console.debug('🍪 [CONFIG] Parsing cookies directly:', cookies);
+          const langMatch = cookies.match(/lang=([^;,\s]+)/);
+          if (langMatch) {
+            const langFromCookie = langMatch[1];
+            console.debug('🌍 [CONFIG] Language from direct cookie parsing:', langFromCookie);
+            return langFromCookie;
+          }
+        }
+
+        // ✅ ESTRATEGIA 4: Default fallback
+        console.debug('🔧 [CONFIG] Using default language: es');
+        return 'es';
+      },
+      deps: [[new Optional(), REQUEST], Injector]
+    }
+```
+
+En el servidor
