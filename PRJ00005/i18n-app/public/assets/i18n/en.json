@@ -1,0 +1,36 @@
+{
+  "welcomeMessage": "Welcome, {{ firstName }}! How are you today?",
+  "changeLanguage": "Change language",
+  "pricingPage": {
+    "title": "Pricing",
+    "description": "Here you can find our pricing plans"
+  },
+  "plans": {
+    "texts": {
+      "perMonth": "per month",
+      "join": "Join",
+      "online-ordering": "Online ordering",
+      "limited-support": "Limited support"
+    },
+    "basic": {
+      "name": "Basic Plan",
+      "price": "9.99",
+      "description": "Perfect for small businesses"
+    },
+    "pro": {
+      "name": "Pro Plan",
+      "price": "19.99",
+      "description": "Ideal for growing companies"
+    },
+    "enterprise": {
+      "name": "Enterprise Plan",
+      "price": "29.99",
+      "description": "For large organizations"
+    }
+  },
+  "currency": {
+    "code": "USD",
+    "symbol": "$",
+    "format": "1.2-2"
+  }
+}
