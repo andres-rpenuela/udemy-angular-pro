@@ -1,6 +1,7 @@
-import {  effect, inject, Injectable, linkedSignal, PLATFORM_ID, signal } from '@angular/core';
+import {  effect, Inject, inject, Injectable, INJECTOR, linkedSignal, PLATFORM_ID, signal } from '@angular/core';
 import { SsrCookieService } from 'ngx-cookie-service-ssr';
 import { TranslateService } from '@ngx-translate/core';
+import { SERVER_LANGUAGE_TOKEN } from '../../tokens/language/server-language.token';
 
 export type LANGUAGE = 'en' | 'es' | 'fr' ;
 
@@ -35,8 +36,17 @@ export class LanguagesService {
     this.translate.use(this.currentLanguage());
   });
 
+  // Da error de injección en el constructor, cuando se ejecuta en el cliente porque no es proveedio
+  // constructor(@Inject(SERVER_LANGUAGE_TOKEN) private serverLanguage: string) {
+  //       console.debug('Lenguaje del servidor:', serverLanguage);
+  // }
 
-  constructor() { }
+  constructor() {
+      if(this.plantformId === 'server'){
+        const serverLanguage = inject(SERVER_LANGUAGE_TOKEN) as string;
+        console.debug('Lenguaje del servidor:', serverLanguage);
+      }
+    }
 
   changeLanguage(lang: LANGUAGE) {
     console.debug('Cambiando idioma a:', lang);

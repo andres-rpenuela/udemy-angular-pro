@@ -3,6 +3,7 @@ import { mergeApplicationConfig, ApplicationConfig, inject, REQUEST, RESPONSE_IN
 import { provideServerRendering, withRoutes } from '@angular/ssr';
 import { appConfig } from './app.config';
 import { serverRoutes } from './app.routes.server';
+import { SERVER_LANGUAGE_TOKEN } from './tokens/language/server-language.token';
 
 const serverConfig: ApplicationConfig = {
   providers: [
@@ -20,6 +21,10 @@ const serverConfig: ApplicationConfig = {
         return injector.get(RESPONSE_INIT, null);
       },
       deps: [Injector]
+    },
+    {
+      provide: SERVER_LANGUAGE_TOKEN,
+      useValue: 'en-US' // Example: set default server language to 'en-US'
     }
   ]
 };

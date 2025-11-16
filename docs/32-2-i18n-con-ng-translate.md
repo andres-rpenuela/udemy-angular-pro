@@ -1,13 +1,13 @@
 # Internazionalización con i18n con `@ng-translate` con `@ng-cookie-server`
 
 [1 Configuración de Cookies/Headers Personalizados en Angular
-](#-configuración-de-cookiesheaders-personalizados-en-angular)
+](32-2-a-i18n-custom-inject-token.md#-configuración-de-cookiesheaders-personalizados-en-angular)
 
-[2 Trabajando con Cookies en Angular](#-trabajando-con-cookies-en-angular)
-[2.1 Usando Document (Nativo)](#1-usando-document-nativo)
-[2.2 Usando ngx-cookie-service](#2-usando-ngx-cookie-service)
-[2.3 Usando ngx-cookie-service-ssr](#3-usando-ngx-cookie-service-ssr)
-[3 Incorporar `ngx-transalate`]
+[2 Trabajando con Cookies en Angular](32-2-a-i18n-custom-inject-token.md#-trabajando-con-cookies-en-angular)
+[2.1 Usando Document (Nativo)](32-2-a-i18n-custom-inject-token.md#1-usando-document-nativo)
+[2.2 Usando ngx-cookie-service](32-2-a-i18n-custom-inject-token.md#2-usando-ngx-cookie-service)
+[2.3 Usando ngx-cookie-service-ssr](32-2-a-i18n-custom-inject-token.md#3-usando-ngx-cookie-service-ssr)
+[3 Incorporar `ngx-transalate`](32-2-a-i18n-custom-inject-token.md#3-incorporar-ngx-transalate)
 
 ## 🔧 Configuración de Cookies/Headers Personalizados en Angular
 
@@ -418,7 +418,7 @@ Y en la vsta html usar la key del mensaje con el pipe
 ```
 
 
-# Aneox: 🔒 **Mejores prácticas de seguridad**
+# Anexo: 🔒 **Mejores prácticas de seguridad**
 
 ````typescript
 // secure-cookie.service.ts
