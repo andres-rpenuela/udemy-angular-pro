@@ -9,20 +9,28 @@
     "texts": {
       "perMonth": "per month",
       "join": "Join",
-      "online-ordering": "Online Ordering",
-      "limited-support": "Limited Support"
+      "online-ordering": "Online ordering",
+      "limited-support": "Limited support"
     },
     "basic": {
       "name": "Basic Plan",
-      "description": "Basic plan description"
+      "price": "9.99",
+      "description": "Perfect for small businesses"
     },
     "pro": {
       "name": "Pro Plan",
-      "description": "Pro plan description"
+      "price": "19.99",
+      "description": "Ideal for growing companies"
     },
     "enterprise": {
       "name": "Enterprise Plan",
-      "description": "Enterprise plan description"
+      "price": "29.99",
+      "description": "For large organizations"
     }
+  },
+  "currency": {
+    "code": "USD",
+    "symbol": "$",
+    "format": "1.2-2"
   }
 }

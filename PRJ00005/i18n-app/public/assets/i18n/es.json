@@ -14,18 +14,23 @@
     },
     "basic": {
       "name": "Plan Básico",
-      "price": 9.99,
-      "description": "Descripción del plan básico"
+      "price": "9.99",
+      "description": "Perfecto para pequeñas empresas"
     },
     "pro": {
       "name": "Plan Pro",
-      "price": 20,
-      "description": "Descripción del plan pro"
+      "price": "19.99",
+      "description": "Ideal para empresas en crecimiento"
     },
     "enterprise": {
       "name": "Plan Empresarial",
-      "price": 30,
-      "description": "Descripción del plan empresarial"
+      "price": "29.99",
+      "description": "Para grandes organizaciones"
     }
+  },
+  "currency": {
+    "code": "EUR",
+    "symbol": "€",
+    "format": "1.2-2"
   }
 }

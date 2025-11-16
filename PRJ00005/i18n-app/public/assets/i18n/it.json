@@ -1,31 +1,36 @@
 {
-  "welcomeMessage": "Benvenuto, {{ firstName }}! Come stai oggi?",
-  "changeLanguage": "Cambia lingua",
+  "welcomeMessage": "¡Bienvenido, {{ firstName }}! ¿Cómo estás hoy?",
+  "changeLanguage": "Cambiar idioma",
   "pricingPage": {
-    "title": "Prezzi",
-    "description": "Qui puoi trovare i nostri piani tariffari"
+    "title": "Precios",
+    "description": "Aquí puedes encontrar nuestros planes de precios"
   },
   "plans": {
     "texts": {
-      "perMonth": "al mese",
-      "join": "Iscriviti",
-      "online-ordering": "Ordini online",
-      "limited-support": "Supporto limitato"
+      "perMonth": "por mes",
+      "join": "Unirse",
+      "online-ordering": "Pedidos en línea",
+      "limited-support": "Soporte limitado"
     },
     "basic": {
-      "name": "Piano Base",
-      "price": 9.99,
-      "description": "Descrizione del piano base"
+      "name": "Plan Básico",
+      "price": "9.99",
+      "description": "Perfecto para pequeñas empresas"
     },
     "pro": {
-      "name": "Piano Pro",
-      "price": 20,
-      "description": "Descrizione del piano pro"
+      "name": "Plan Pro",
+      "price": "19.99",
+      "description": "Ideal para empresas en crecimiento"
     },
     "enterprise": {
-      "name": "Piano Aziendale",
-      "price": 30,
-      "description": "Descrizione del piano aziendale"
+      "name": "Plan Empresarial",
+      "price": "29.99",
+      "description": "Para grandes organizaciones"
     }
+  },
+  "currency": {
+    "code": "EUR",
+    "symbol": "€",
+    "format": "1.2-2"
   }
 }

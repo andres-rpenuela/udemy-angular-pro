@@ -359,7 +359,64 @@ mkdir -p i18n-app/public/assets/i18n
 echo '{"HELLO": "Hello", "WELCOME": "Welcome to our app!"}' > 18n-app/public/assets/i18n/en.json
 echo '{"HELLO": "Hola", "WELCOME": "¡Bienvenido a nuestra aplicación!"}' > 18n-app/public/assets/i18n/es.json
 echo '{"HELLO": "Bonjour", "WELCOME": "Bienvenue dans notre application!"}' > 18n-app/public/assets/i18n/fr.json
+echo '{"HELLO_HAS_PARAM": "Bonjour {{firstName}}", "WELCOME": "Bienvenue dans notre application!"}' > 18n-app/public/assets/i18n/fr.json
+
 ```
+
+4. Reemplazar textos por mensajes.
+
+Basta con importar los pipes en el componente standalone:
+
+```ts
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+
+
+@Component({
+  selector: 'app-products',
+  templateUrl: './products.component.html',
+  styleUrls: ['./products.component.css'],
+  imports: [RouterLink, LenguageSelectorComponent, 
+    TranslateModule
+  ]
+})
+export default class ProductsComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}
+```
+
+Y en la vsta html usar la key del mensaje con el pipe
+
+```html
+<div class="title">
+    <h1>{{ 'demo.title' | translate }}</h1>
+</div>
+<div>
+    <h2>Simple translations without parameters</h2>
+
+    <p>{{ 'demo.simple.text-with-pipe' | translate }}</p>
+    <!-- mssga with param -->
+    <p>{{ 'demo.simple.text-with-pipe' | translate:{ 'nameParam1':'valueParam1',...} }}</p>
+    <!-- param signal compoent-->
+    <p>{{ 'demo.simple.text-with-pipe' | translate:{ 'nameParam1': attrSignal() ,...} }}</p>
+    <!-- param attr component-->
+    <p>{{ 'demo.simple.text-with-pipe' | translate:{ 'nameParam1': attr() ,...} }}</p>
+
+    <!-- param con numeros y currency, debe estar en el fichero como un string el numero-->
+    <p {{ "plans.enterprise.price" | translate | currency:( "currency.code" | translate): ("currency.symbol" | translate) : ("currency.format" | translate) }}></p>
+
+    <!-- alternativas -->
+    <p [translate]="'demo.simple.text-as-attribute'"></p>
+
+    <!-- esta no es reactiva -->
+    <p translate>demo.simple.text-as-content</p>
+</div>
+```
+
 
 # Aneox: 🔒 **Mejores prácticas de seguridad**
 
